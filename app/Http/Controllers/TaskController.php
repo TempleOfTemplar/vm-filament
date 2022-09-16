@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Inertia\Inertia;
+use Spatie\Tags\Tag;
 
 class TaskController extends Controller
 {
@@ -22,6 +23,7 @@ class TaskController extends Controller
     {
         $searchQuery = Request::input('search');
         $toysFilter = Request::input('toys');
+        $tagsFilter = Request::input('tags');
         $tasks = Task::query()
             ->when($searchQuery, function ($query, $search) {
                 $query->where('title', 'like', '%' . $search . '%')
@@ -30,10 +32,25 @@ class TaskController extends Controller
                 $query->whereHas('toys', function ($query) use ($toysFilter) {
                     $query->whereIn('toy_id', $toysFilter);
                 });
-            })->with('toys')->with('category')->with('tags')->with('author');
+            })
+            ->when($tagsFilter, function ($query, $tagsFilter) {
+                $query->whereHas('tags', function ($query) use ($tagsFilter) {
+                    $query->whereIn('tag_id', $tagsFilter);
+                });
+            })
+            ->with('toys')
+            ->with('category')
+            ->with('tags')
+            ->with('author')
+            ->get();
         $categories = Category::all();
         $toys = Toy::all();
-        return Inertia::render('Task/ListTasks', ['tasks' => $tasks->get(), 'toys' => $toys, 'categories' => $categories]);
+        $tags = Tag::all();
+        return Inertia::render('Task/ListTasks',
+            ['tasks' => $tasks,
+                'toys' => $toys,
+                'categories' => $categories,
+                'tags' => $tags]);
     }
 
     /**
@@ -56,13 +73,20 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
+        $tags = $request->tags;
+        $category = $request->category;
         $toys = $request->toys;
-        $categories = $request->categories;
+        clock()->info(" $request:", $request);
+        clock()->info('$category:', $category);
         $createdTask = Task::create(
-            array_merge($request->validated(), ['author_id' => Auth::user()->getAuthIdentifier()])
+            array_merge($request->validated(),
+                ['author_id' => Auth::id()],
+                ['category_id' => $category])
         );
+
+
         $createdTask->toys()->attach($toys);
-        $createdTask->categories()->attach($categories);
+        $createdTask->syncTags($tags);
         return Redirect::route('tasks.index');
     }
 

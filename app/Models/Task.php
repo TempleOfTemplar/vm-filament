@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Tags\HasTags;
 
 class Task extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, HasTags;
 
     protected $fillable = [
         'title',
@@ -20,12 +21,10 @@ class Task extends Model implements HasMedia
         'content',
         'is_published'
     ];
-
     protected $casts = [
-        'is_published' => 'boolean',
-        'tagsList' => 'array',
-        'toysList' => 'array'
+        'is_published' => 'boolean'
     ];
+
 
     public function category()
     {
@@ -35,11 +34,6 @@ class Task extends Model implements HasMedia
     public function toys()
     {
         return $this->belongsToMany(Toy::class, 'task_toy');
-    }
-
-    public function tags()
-    {
-        return $this->belongsToMany(Tag::class, 'task_tag');
     }
 
     public function author()

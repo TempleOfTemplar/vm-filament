@@ -12,6 +12,7 @@ import {
     IconSwitchHorizontal,
     IconTrash,
 } from '@tabler/icons';
+import DarkThemeToggle from "./DarkThemeToggle";
 
 const useStyles = createStyles((theme) => ({
     header: {
@@ -92,6 +93,7 @@ const Navbar: FC<NavbarProps> = ({user}) => {
             <Container className={classes.mainSection}>
                 <Group position="apart">
                     <div className={classes.logo}/>
+                    <DarkThemeToggle/>
                     <Burger opened={opened} onClick={toggle} className={classes.burger} size="sm"/>
                     {user ? <Menu
                         width={260}

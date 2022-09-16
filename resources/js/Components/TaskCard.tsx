@@ -1,9 +1,9 @@
 import React, {FC} from 'react';
-import {Task} from "../models/Task";
+import {Task} from "../Models/Task";
 import {IconHeart} from '@tabler/icons';
 import {ActionIcon, Avatar, Badge, Button, Card, createStyles, Group, Text} from '@mantine/core';
-import {Toy} from "../models/Toy";
-import {Tag} from "../models/Tag";
+import {Toy} from "../Models/Toy";
+import {Tag} from "../Models/Tag";
 
 const useStyles = createStyles((theme) => ({
     card: {
@@ -47,7 +47,7 @@ const TaskCard: FC<TaskCardProps> = ({task}) => {
                                 color={theme.colorScheme === 'dark' ? 'dark' : 'gray'}
                                 key={tag.id}
                             >
-                                {tag.title}
+                                {tag.name.ru}
                             </Badge>
                         ))}
                     </Group>

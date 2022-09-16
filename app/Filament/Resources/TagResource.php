@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TagResource\Pages;
 use App\Filament\Resources\TagResource\RelationManagers\TasksRelationManager;
-use App\Models\Tag;
 use Closure;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\TextInput;
@@ -14,6 +13,7 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Str;
+use Spatie\Tags\Tag;
 
 class TagResource extends Resource
 {

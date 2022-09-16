@@ -1,45 +1,72 @@
 import React, {ChangeEvent, useEffect, useState} from 'react';
 import {InertiaLink, usePage} from "@inertiajs/inertia-react";
 import {Inertia} from "@inertiajs/inertia";
-import Select from "react-select";
 import AuthenticatedLayout from "../../Layouts/AuthenticatedLayout";
 import TaskCard from "../../Components/TaskCard";
-import {SimpleGrid} from "@mantine/core";
+import {Group, MultiSelect, Select, SimpleGrid, TextInput} from "@mantine/core";
+import {IconSearch} from "@tabler/icons";
+import useDebounce from "../../Hooks/useDebounce";
 
 
 //href={route("tasks.edit", id)}
 const ListTasks = () => {
-    const {tasks, toys, categories, auth} = usePage().props as any;
-    console.log("AUTH", auth);
+    const {tasks, toys, categories, tags, auth} = usePage().props as any;
     const toysItems = toys.map(toy => {
         return {value: toy.id, label: toy.title};
     })
-    const [searchQuery, setSearchQuery] = useState<string>();
-    const [toysFilter, setToysFilter] = useState<[]>();
-    const [categoriesFilter, setCategoriesFilter] = useState<[]>();
-    const promiseOptions = (inputValue: string) => {
-        // Inertia.get(route("toy.list", task.id));
-    };
+    const categoriesItems = categories.map(category => {
+        return {value: category.id, label: category.title};
+    })
+    const tagsItems = tags.map(tag => {
+        return {value: tag.id, label: tag.name.ru};
+    })
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const debouncedSearchQuery = useDebounce<string>(searchQuery, 500)
+
+    const [toysFilter, setToysFilter] = useState<any[]>();
+    const [tagsFilter, setTagsFilter] = useState<any[]>();
+    const [categoryFilter, setCategoryFilter] = useState<any>();
 
     useEffect(() => {
+        const queryParamsData: any = {};
+        if (searchQuery?.length) {
+            queryParamsData.search = searchQuery;
+        }
+        if (toysFilter?.length) {
+            queryParamsData.toys = toysFilter;
+        }
+        if (tagsFilter?.length) {
+            queryParamsData.tags = tagsFilter;
+        }
+        if (categoryFilter) {
+            queryParamsData.category = categoryFilter;
+        }
         Inertia.get(
             route(route().current()),
-            {search: searchQuery, toys: toysFilter},
+            queryParamsData,
             {
                 preserveState: true,
                 replace: true,
             }
         );
-    }, [searchQuery, toysFilter]);
+    }, [debouncedSearchQuery, toysFilter, categoryFilter, tagsFilter]);
 
     function onSearchQueryChange(e: ChangeEvent<HTMLInputElement>) {
         setSearchQuery(e.target.value)
     }
 
-    function onToysFilterChange(selectedToys: any) {
-        const selectedValues = selectedToys.map(selectedToy => selectedToy.value);
-        setToysFilter(selectedValues)
+    function onToysFilterChange(selectedToys: string[]) {
+        setToysFilter(selectedToys)
     }
+
+    function onTagsFilterChange(selectedTags: string[]) {
+        setTagsFilter(selectedTags)
+    }
+
+    function onCategoryFilterChange(selectedCategory: string) {
+        setCategoryFilter(selectedCategory)
+    }
+
 
     return (
         <AuthenticatedLayout
@@ -49,10 +76,21 @@ const ListTasks = () => {
             <div>
                 <div className="container mx-auto">
                     <h1 className="mb-8 text-3xl font-bold text-center">Post</h1>
-                    <div className="filters">
-                        <input value={searchQuery} onChange={onSearchQueryChange}/>
-                        <Select options={toysItems} isMulti={true} onChange={onToysFilterChange}/>
-                    </div>
+                    <Group dir='row' className="filters">
+                        <TextInput
+                            icon={<IconSearch size={18} stroke={1.5}/>}
+                            placeholder="Search tasks"
+                            rightSectionWidth={42}
+                            value={searchQuery}
+                            onChange={onSearchQueryChange}
+                        />
+                        <MultiSelect onChange={onToysFilterChange} data={toysItems}/>
+                        <MultiSelect onChange={onTagsFilterChange} data={tagsItems}/>
+                        <Select onChange={onCategoryFilterChange} data={categoriesItems}/>
+                        {/*<Select options={toysItems} isMulti={true} onChange={onToysFilterChange}/>*/}
+                        {/*<Select options={tagsItems} isMulti={true} onChange={onTagsFilterChange}/>*/}
+                        {/*<Select options={categoriesItems} isMulti={false} onChange={onCategoryFilterChange}/>*/}
+                    </Group>
 
 
                     <div className="flex items-center justify-between mb-6">
