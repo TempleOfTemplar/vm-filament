@@ -18,8 +18,9 @@ return new class extends Migration
             $table->string("title");
             $table->string("excerpt");
             $table->foreignId("category_id")->constrained()->onDelete('cascade');
+            $table->foreignId("author_id")->constrained('users')->onDelete('cascade');
             $table->string('slug')->unique();
-            $table->json('content');
+            $table->text('content');
             $table->boolean('is_published')->default(false);
             $table->timestamps();
         });

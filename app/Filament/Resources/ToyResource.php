@@ -37,7 +37,7 @@ class ToyResource extends Resource
                             $set('slug', Str::slug($state));
                         }),
                     TextInput::make('slug')->required(),
-                    Textarea::make('description')->required(),
+                    Textarea::make('description')->default(""),
                     SpatieMediaLibraryFileUpload::make('image')->collection("toys")
                 ])
             ]);

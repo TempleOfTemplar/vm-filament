@@ -15,6 +15,7 @@ class Task extends Model implements HasMedia
         'title',
         'excerpt',
         'category_id',
+        'author_id',
         'slug',
         'content',
         'is_published'
@@ -22,6 +23,8 @@ class Task extends Model implements HasMedia
 
     protected $casts = [
         'is_published' => 'boolean',
+        'tagsList' => 'array',
+        'toysList' => 'array'
     ];
 
     public function category()
@@ -37,6 +40,11 @@ class Task extends Model implements HasMedia
     public function tags()
     {
         return $this->belongsToMany(Tag::class, 'task_tag');
+    }
+
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'author_id');
     }
 
 }

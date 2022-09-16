@@ -16,4 +16,25 @@ class EditTask extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    public function mount($record): void
+    {
+        $this->record = $this->resolveRecord($record);
+
+        $this->authorizeAccess();
+
+        $this->callHook('beforeFill');
+
+        $data = $this->getRecord()->attributesToArray();
+        if ($data['content']) {
+            $data['content'] = json_decode($data['content'], true);
+        }
+        $data = $this->mutateFormDataBeforeFill($data);
+
+        $this->form->fill($data);
+
+        $this->callHook('afterFill');
+    }
+
+
 }

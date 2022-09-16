@@ -4,7 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TaskResource\Pages;
 use App\Filament\Resources\TaskResource\RelationManagers\TagsRelationManager;
+use App\Models\Tag;
 use App\Models\Task;
+use App\Models\Toy;
 use Closure;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\MultiSelect;
@@ -16,8 +18,10 @@ use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use FilamentEditorJs\Forms\Components\EditorJs;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class TaskResource extends Resource
@@ -38,14 +42,19 @@ class TaskResource extends Resource
                             $set('slug', Str::slug($state));
                         }),
                     TextInput::make('slug')->required(),
-                    TextInput::make('excerpt')->required(),
+                    TextInput::make('excerpt'),
                     Select::make('category_id')
-                        ->relationship('category', 'title'),
+                        ->relationship('category', 'title')->required(),
                     MultiSelect::make('toys')
-                        ->relationship('toys', 'title'),
+                        ->relationship('toys', 'title')
+                        ->options(Toy::all()->pluck('title', 'id')),
                     MultiSelect::make('tags')
-                        ->relationship('tags', 'title'),
-                    EditorJs::make('content')->fileAttachmentsDisk('public'),
+                        ->relationship('tags', 'title')
+                        ->options(Tag::all()->pluck('title', 'id')),
+                    EditorJs::make('content')->fileAttachmentsDisk('public')->required(),
+                    Select::make('author_id')
+                        ->relationship('author', 'name')
+                        ->default(Auth::id()),
                     Toggle::make('is_published')
                 ])
             ]);
@@ -56,8 +65,10 @@ class TaskResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('title')->label('название')->sortable(),
-                TextColumn::make('slug'),
+                TextColumn::make('title')->label('название')->sortable()->searchable(),
+                TextColumn::make('author.name')->label('автор')->sortable()->searchable(),
+                TagsColumn::make('toys')->label('инвентарь')->separator(','),
+                SpatieTagsColumn::make('tags')->label('теги')->separator(','),
                 BooleanColumn::make('is_published')
             ])
             ->filters([
