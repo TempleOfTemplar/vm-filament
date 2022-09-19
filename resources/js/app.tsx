@@ -15,8 +15,9 @@ createInertiaApp({
         title: (title) => `${title} - ${appName}`,
         resolve: (name) => resolvePageComponent(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx')),
         setup({el, App, props}) {
+            console.log("props", props);
             const root = createRoot(el); // createRoot(container!) if you use TypeScript
-            return root.render(<CommonLayout><App {...props} /></CommonLayout>);
+            return root.render(<CommonLayout auth={props.initialPage?.props?.auth}><App {...props} /></CommonLayout>);
         },
     }
 );

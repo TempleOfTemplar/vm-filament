@@ -33,7 +33,7 @@ const DarkThemeToggle = () => {
     const { classes, cx } = useStyles();
 
     return (
-        <Group position="center" my={30}>
+        <Group position="center">
             <div className={classes.root}>
                 <IconSun className={cx(classes.icon, classes.iconLight)} size={18} stroke={1.5} />
                 <IconMoonStars className={cx(classes.icon, classes.iconDark)} size={18} stroke={1.5} />

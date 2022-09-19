@@ -41,6 +41,7 @@
         "@tabler/icons": "^1.96.0",
         "axios": "^0.27.2",
         "clockwork-browser": "^1.1.1",
+        "editorjs-html": "^3.4.2",
         "react": "^18.2.0",
         "react-debounce-input": "^3.3.0",
         "react-dom": "^18.2.0",

@@ -2,22 +2,31 @@
 
 namespace App\Models;
 
+use FilamentCurator\Models\Media;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Toy extends Model implements HasMedia
+class Toy extends Model
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory;
 
     protected $fillable = [
         'title',
         'description',
-        'slug'
+        'slug',
+        'image'
     ];
 
-    public function tasks() {
+    public function tasks()
+    {
         return $this->belongsToMany(Task::class, 'task_toy');
+    }
+
+    protected $with = ['image'];
+
+    public function image(): HasOne
+    {
+        return $this->hasOne(Media::class, 'id', 'image');
     }
 }

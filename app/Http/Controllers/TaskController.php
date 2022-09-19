@@ -62,7 +62,8 @@ class TaskController extends Controller
     {
         $categories = Category::all();
         $toys = Toy::all();
-        return Inertia::render('Task/CreateTask', ['toys' => $toys, 'categories' => $categories]);
+        $tags = Tag::all();
+        return Inertia::render('Task/CreateTask', ['toys' => $toys, 'categories' => $categories, 'tags' => $tags]);
     }
 
     /**
@@ -73,6 +74,7 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
+        clock()->info($request);
         $tags = $request->tags;
         $category = $request->category;
         $toys = $request->toys;
@@ -85,7 +87,7 @@ class TaskController extends Controller
         );
 
 
-        $createdTask->toys()->attach($toys);
+        $createdTask->toys()->sync($toys);
         $createdTask->syncTags($tags);
         return Redirect::route('tasks.index');
     }
@@ -94,11 +96,13 @@ class TaskController extends Controller
      * Display the specified resource.
      *
      * @param \App\Models\Task $task
-     * @return \Illuminate\Http\Response
+     * @return \Inertia\Response
      */
     public function show(Task $task)
     {
-        //
+        $taskToReturn = $task->load(['tags', 'category', 'toys', 'author','image']);;
+
+        return Inertia::render('Task/ViewTask', ['task' => $taskToReturn]);
     }
 
     /**

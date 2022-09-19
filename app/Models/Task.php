@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
@@ -36,9 +37,12 @@ class Task extends Model implements HasMedia
         return $this->belongsToMany(Toy::class, 'task_toy');
     }
 
+
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');
     }
+
+    protected $with = [];
 
 }

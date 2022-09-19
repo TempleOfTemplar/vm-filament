@@ -45,9 +45,9 @@ const TaskCard: FC<TaskCardProps> = ({task}) => {
                         {task.tags.map((tag: Tag) => (
                             <Badge
                                 color={theme.colorScheme === 'dark' ? 'dark' : 'gray'}
-                                key={tag.id}
+                                key={tag?.id}
                             >
-                                {tag.name.ru}
+                                {tag?.name?.ru}
                             </Badge>
                         ))}
                     </Group>
@@ -102,8 +102,8 @@ const TaskCard: FC<TaskCardProps> = ({task}) => {
             </Group>
 
             <Group mt="xs">
-                <Button radius="md" style={{flex: 1}}>
-                    Show details
+                <Button component="a" radius="md" style={{flex: 1}} href={route('tasks.show', task)}>
+                    Читать
                 </Button>
                 <ActionIcon variant="default" radius="md" size={36}>
                     <IconHeart size={18} className={classes.like} stroke={1.5}/>

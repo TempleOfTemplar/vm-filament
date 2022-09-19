@@ -1,81 +1,97 @@
 import React, {FC, useState} from 'react';
-import {Avatar, Burger, Container, createStyles, Group, Menu, Text, UnstyledButton,} from '@mantine/core';
+import {Avatar, Container, createStyles, Group, Header, Menu, Text, UnstyledButton} from '@mantine/core';
 import {useDisclosure} from '@mantine/hooks';
-import {
-    IconChevronDown,
-    IconHeart,
-    IconLogout,
-    IconMessage,
-    IconPlayerPause,
-    IconSettings,
-    IconStar,
-    IconSwitchHorizontal,
-    IconTrash,
-} from '@tabler/icons';
+import {IconChevronDown, IconTrash,} from '@tabler/icons';
+import ApplicationLogo from "./ApplicationLogo";
 import DarkThemeToggle from "./DarkThemeToggle";
 
+const HEADER_HEIGHT = 60;
 const useStyles = createStyles((theme) => ({
-    header: {
-        paddingTop: theme.spacing.sm,
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-        borderBottom: `1px solid ${
-            theme.colorScheme === 'dark' ? 'transparent' : theme.colors.gray[2]
-        }`,
-        marginBottom: 120,
+    root: {
+        position: 'relative',
+        zIndex: 1,
     },
 
-    mainSection: {
-        paddingBottom: theme.spacing.sm,
+    dropdown: {
+        position: 'absolute',
+        top: HEADER_HEIGHT,
+        left: 0,
+        right: 0,
+        zIndex: 0,
+        borderTopRightRadius: 0,
+        borderTopLeftRadius: 0,
+        borderTopWidth: 0,
+        overflow: 'hidden',
+
+        [theme.fn.largerThan('sm')]: {
+            display: 'none',
+        },
     },
-    logo: {},
+
+    header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        height: '100%',
+    },
+
+    mainGroup: {
+        width: '100%'
+    },
+
+    links: {
+        [theme.fn.smallerThan('sm')]: {
+            display: 'none',
+        },
+    },
+
+    burger: {
+        [theme.fn.largerThan('sm')]: {
+            display: 'none',
+        },
+    },
+
+    link: {
+        display: 'block',
+        lineHeight: 1,
+        padding: '8px 12px',
+        borderRadius: theme.radius.sm,
+        textDecoration: 'none',
+        color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
+        fontSize: theme.fontSizes.sm,
+        fontWeight: 500,
+
+        '&:hover': {
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+        },
+
+        [theme.fn.smallerThan('sm')]: {
+            borderRadius: 0,
+            padding: theme.spacing.md,
+        },
+    },
+
+    linkActive: {
+        '&, &:hover': {
+            backgroundColor: theme.fn.variant({variant: 'light', color: theme.primaryColor}).background,
+            color: theme.fn.variant({variant: 'light', color: theme.primaryColor}).color,
+        },
+    },
+    logo: {
+        height: 48
+    },
     user: {
         color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
-        padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
+        padding: 0,
         borderRadius: theme.radius.sm,
         transition: 'background-color 100ms ease',
 
         '&:hover': {
             backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white,
         },
-
-        [theme.fn.smallerThan('xs')]: {
-            display: 'none',
-        },
     },
-
-    burger: {
-        [theme.fn.largerThan('xs')]: {
-            display: 'none',
-        },
-    },
-
     userActive: {
         backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white,
-    },
-
-    tabs: {
-        [theme.fn.smallerThan('sm')]: {
-            display: 'none',
-        },
-    },
-
-    tabsList: {
-        borderBottom: '0 !important',
-    },
-
-    tab: {
-        fontWeight: 500,
-        height: 38,
-        backgroundColor: 'transparent',
-
-        '&:hover': {
-            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
-        },
-
-        '&[data-active]': {
-            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-            borderColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[2],
-        },
     },
 }));
 
@@ -83,18 +99,19 @@ interface NavbarProps {
     user: { name: string; avatar: string };
 }
 
+// const links = [{link: route("tasks.index"), lavel: "Задания"}];
+
 const Navbar: FC<NavbarProps> = ({user}) => {
     const {classes, theme, cx} = useStyles();
     const [opened, {toggle}] = useDisclosure(false);
     const [userMenuOpened, setUserMenuOpened] = useState(false);
 
     return (
-        <div className={classes.header}>
-            <Container className={classes.mainSection}>
-                <Group position="apart">
-                    <div className={classes.logo}/>
-                    <DarkThemeToggle/>
-                    <Burger opened={opened} onClick={toggle} className={classes.burger} size="sm"/>
+        <Header height={HEADER_HEIGHT} mb={24} className={classes.root}>
+            <Container className={classes.header} my={0} px={0} py={0}>
+                <Group position="apart" my={0} className={classes.mainGroup}>
+                    <ApplicationLogo className={classes.logo}/>
+
                     {user ? <Menu
                         width={260}
                         position="bottom-end"
@@ -106,8 +123,8 @@ const Navbar: FC<NavbarProps> = ({user}) => {
                             <UnstyledButton
                                 className={cx(classes.user, {[classes.userActive]: userMenuOpened})}
                             >
-                                <Group spacing={7}>
-                                    <Avatar src={user.avatar} alt={user.name} radius="xl" size={20}/>
+                                <Group spacing={6}>
+                                    <Avatar src={user.avatar} alt={user.name} radius="xl" size={40}/>
                                     <Text weight={500} size="sm" sx={{lineHeight: 1}} mr={3}>
                                         {user.name}
                                     </Text>
@@ -116,28 +133,31 @@ const Navbar: FC<NavbarProps> = ({user}) => {
                             </UnstyledButton>
                         </Menu.Target>
                         <Menu.Dropdown>
-                            <Menu.Item icon={<IconHeart size={14} color={theme.colors.red[6]} stroke={1.5}/>}>
-                                Liked posts
-                            </Menu.Item>
-                            <Menu.Item icon={<IconStar size={14} color={theme.colors.yellow[6]} stroke={1.5}/>}>
-                                Saved posts
-                            </Menu.Item>
-                            <Menu.Item icon={<IconMessage size={14} color={theme.colors.blue[6]} stroke={1.5}/>}>
-                                Your comments
-                            </Menu.Item>
+                            {/*<Menu.Item icon={<IconHeart size={14} color={theme.colors.red[6]} stroke={1.5}/>}>*/}
+                            {/*    Liked posts*/}
+                            {/*</Menu.Item>*/}
+                            {/*<Menu.Item icon={<IconStar size={14} color={theme.colors.yellow[6]} stroke={1.5}/>}>*/}
+                            {/*    Saved posts*/}
+                            {/*</Menu.Item>*/}
+                            {/*<Menu.Item icon={<IconMessage size={14} color={theme.colors.blue[6]} stroke={1.5}/>}>*/}
+                            {/*    Your comments*/}
+                            {/*</Menu.Item>*/}
 
-                            <Menu.Label>Settings</Menu.Label>
-                            <Menu.Item icon={<IconSettings size={14} stroke={1.5}/>}>Account settings</Menu.Item>
-                            <Menu.Item icon={<IconSwitchHorizontal size={14} stroke={1.5}/>}>
-                                Change account
-                            </Menu.Item>
-                            <Menu.Item icon={<IconLogout size={14} stroke={1.5}/>}>Logout</Menu.Item>
+                            {/*<Menu.Label>Settings</Menu.Label>*/}
+                            {/*<Menu.Item icon={<IconSettings size={14} stroke={1.5}/>}>Account settings</Menu.Item>*/}
+                            {/*<Menu.Item icon={<IconSwitchHorizontal size={14} stroke={1.5}/>}>*/}
+                            {/*    Change account*/}
+                            {/*</Menu.Item>*/}
+                            {/*<Menu.Item icon={<IconLogout size={14} stroke={1.5}/>}>Logout</Menu.Item>*/}
 
-                            <Menu.Divider/>
+                            {/*<Menu.Divider/>*/}
 
-                            <Menu.Label>Danger zone</Menu.Label>
-                            <Menu.Item icon={<IconPlayerPause size={14} stroke={1.5}/>}>
-                                Pause subscription
+                            {/*<Menu.Label>Danger zone</Menu.Label>*/}
+                            {/*<Menu.Item icon={<IconPlayerPause size={14} stroke={1.5}/>}>*/}
+                            {/*    Pause subscription*/}
+                            {/*</Menu.Item>*/}
+                            <Menu.Item color="red">
+                                <DarkThemeToggle/>
                             </Menu.Item>
                             <Menu.Item color="red" icon={<IconTrash size={14} stroke={1.5}/>}>
                                 Delete account
@@ -146,7 +166,7 @@ const Navbar: FC<NavbarProps> = ({user}) => {
                     </Menu> : null}
                 </Group>
             </Container>
-        </div>
+        </Header>
     );
 };
 

@@ -8,6 +8,7 @@ use App\Filament\Resources\ToyResource\RelationManagers;
 use App\Models\Toy;
 use Closure;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -15,8 +16,11 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use FilamentCurator\Forms\Components\MediaPicker;
+use FilamentCurator\Tables\Columns\ThumbnailColumn;
 use Illuminate\Support\Str;
 
 class ToyResource extends Resource
@@ -38,7 +42,8 @@ class ToyResource extends Resource
                         }),
                     TextInput::make('slug')->required(),
                     Textarea::make('description')->default(""),
-                    SpatieMediaLibraryFileUpload::make('image')->collection("toys")
+                    MediaPicker::make('image')
+                    ->label('изображение')
                 ])
             ]);
     }
@@ -49,8 +54,7 @@ class ToyResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('title')->label('название')->sortable(),
-                TextColumn::make('slug'),
-                SpatieMediaLibraryImageColumn::make('image')->collection("toys"),
+                TextColumn::make('slug')
             ])
             ->filters([
                 //
