@@ -33,18 +33,21 @@
         "@editorjs/table": "^2.0.4",
         "@editorjs/warning": "^1.2.0",
         "@emotion/react": "^11.10.4",
-        "@mantine/core": "^5.3.2",
-        "@mantine/form": "^5.3.2",
-        "@mantine/hooks": "^5.3.2",
-        "@mantine/modals": "^5.3.2",
-        "@mantine/notifications": "^5.3.2",
+        "@mantine/carousel": "^5.4.0",
+        "@mantine/core": "^5.4.0",
+        "@mantine/form": "^5.4.0",
+        "@mantine/hooks": "^5.4.0",
+        "@mantine/modals": "^5.4.0",
+        "@mantine/notifications": "^5.4.0",
         "@tabler/icons": "^1.96.0",
         "axios": "^0.27.2",
+        "classnames": "^2.3.2",
         "clockwork-browser": "^1.1.1",
         "editorjs-html": "^3.4.2",
         "react": "^18.2.0",
         "react-debounce-input": "^3.3.0",
         "react-dom": "^18.2.0",
-        "react-editor-js": "^2.1.0"
+        "react-editor-js": "^2.1.0",
+        "react-flip-toolkit": "^7.0.16"
     }
 }

@@ -22,7 +22,6 @@ use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use FilamentEditorJs\Forms\Components\EditorJs;
-use FilamentQuill\Forms\Components\Quill;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -51,8 +50,8 @@ class TaskResource extends Resource
                         ->relationship('toys', 'title')
                         ->options(Toy::all()->pluck('title', 'id')),
                     SpatieTagsInput::make('tags'),
-                    // EditorJs::make('content')->fileAttachmentsDisk('public')->required(),
-                    Quill::make('content'),
+                    EditorJs::make('content')->fileAttachmentsDisk('public')->required(),
+//                    Quill::make('content'),
                     Select::make('author_id')
                         ->relationship('author', 'name')
                         ->default(Auth::id()),

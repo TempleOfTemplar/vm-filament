@@ -29,8 +29,7 @@ class StoreTaskRequest extends FormRequest
     {
         return [
             'title' => 'required',
-            'excerpt' => 'required',
-            'content' => 'required',
+            'excerpt' => 'required'
         ];
     }
 }

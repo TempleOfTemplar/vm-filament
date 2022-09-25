@@ -29,4 +29,9 @@ class Toy extends Model
     {
         return $this->hasOne(Media::class, 'id', 'image');
     }
+
+//    public function thumbnail(): HasOne
+//    {
+//        return $this->hasOne(Media::class, 'id', 'thumbnail');
+//    }
 }

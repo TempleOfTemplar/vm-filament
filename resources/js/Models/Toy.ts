@@ -4,7 +4,7 @@ export interface Toy {
     id: number;
     title: string;
     description: string;
-    image: string;
+    image: any;
     slug: string;
     created_at: any | null;
     updated_at: any | null;

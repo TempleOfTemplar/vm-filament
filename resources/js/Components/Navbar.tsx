@@ -156,6 +156,12 @@ const Navbar: FC<NavbarProps> = ({user}) => {
                             {/*<Menu.Item icon={<IconPlayerPause size={14} stroke={1.5}/>}>*/}
                             {/*    Pause subscription*/}
                             {/*</Menu.Item>*/}
+                            <Menu.Item component='a' href={route("tasks.favorite")}>
+                                Избранные задания
+                            </Menu.Item>
+                            <Menu.Item component='a' href={route("tasks.my")}>
+                                Мои задания
+                            </Menu.Item>
                             <Menu.Item color="red">
                                 <DarkThemeToggle/>
                             </Menu.Item>

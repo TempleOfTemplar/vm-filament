@@ -8,7 +8,6 @@ import {Toy} from "../../Models/Toy";
 import {Category} from "../../Models/Category";
 
 console.log("FULL RE RENDER??");
-debugger;
 const ReactEditorJS = createReactEditorJS()
 
 
@@ -37,51 +36,34 @@ const CreateTask = () => {
 
     function handleSubmit(e: any) {
         e.preventDefault();
-        console.log("data", data);
+        data.content = editorJsValue;
+        console.log(data);
         post(route("tasks.store"));
     }
 
     function handleToysChange(selectedToys: string[]) {
         setSelectedToys(selectedToys);
         setData("toys", selectedToys)
-        console.log("DATA", data);
     }
 
     function handleTagsChange(selectedTags: string[]) {
-        console.log("selectedTags", selectedTags);
         setSelectedTags(selectedTags);
         setData("tags", selectedTags)
-        console.log("DATA", data);
     }
 
     function handleCategoryChange(selectedCategory: string) {
-        console.log("selectedCategory", selectedCategory)
         setSelectedCategory(selectedCategory);
-        console.log("DATA", data);
+        setData("category", selectedCategory)
     }
 
-    const handleInitialize = React.useCallback((instance: any) => {
-        console.log("handleInitialize");
+    function handleInitialize(instance: any) {
         editorCore.current = instance
-    }, [])
-
-    const handleSave = React.useCallback(async () => {
-        debugger;
-        console.log("DATA BEFORE", data);
-        const savedData = await editorCore.current.dangerouslyLowLevelInstance?.save();
-
-        setData("content", "123");
-    }, [])
-
-    function showData() {
-        console.log("DATA NOW", data);
     }
 
-    // const handleSave = React.useCallback(async () => {
-    //     const savedData = await editorCore.current.dangerouslyLowLevelInstance?.save();
-    //     // setData("content", savedData);
-    //     console.log("DATA", data);
-    // }, [])
+    async function handleSave() {
+        const savedData = await editorCore.current.save();
+        setEditorJsValue(savedData);
+    }
 
     return (
         <Container>
@@ -144,7 +126,6 @@ const CreateTask = () => {
                 {/*{errors.content}*/}
                 <Group position="right" mt="md">
                     <Button type={"submit"}>Отправить на модерацию</Button>
-                    <Button onClick={showData}>Проверить что в DATA</Button>
                 </Group>
             </form>
         </Container>

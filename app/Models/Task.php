@@ -4,14 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
+use Illuminate\Support\Facades\Auth;
+use Overtrue\LaravelFavorite\Traits\Favoriteable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
 
 class Task extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, HasTags;
+    use HasFactory, InteractsWithMedia, HasTags, Favoriteable;
 
     protected $fillable = [
         'title',
@@ -44,5 +45,18 @@ class Task extends Model implements HasMedia
     }
 
     protected $with = [];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->author_id = Auth::id();
+        });
+
+        static::updating(function ($model) {
+            $model->author_id = Auth::id();
+        });
+    }
 
 }

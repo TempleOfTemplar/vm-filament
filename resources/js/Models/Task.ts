@@ -19,4 +19,5 @@ export interface Task {
     author?: User | null;
     toys_count?: number | null;
     tags_count?: number | null;
+    has_favorited: boolean;
 }
