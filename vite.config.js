@@ -6,7 +6,7 @@ export default defineConfig({
     assetsInclude: ['**/*.gltf'],
     plugins: [
         laravel({
-            input: 'resources/js/app.tsx',
+            input: 'resources/js/index.tsx',
             refresh: true,
         }),
         react(),

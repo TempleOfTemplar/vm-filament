@@ -3,24 +3,39 @@
 namespace App\Models;
 
 use FilamentCurator\Models\Media;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Toy extends Model
 {
-    use HasFactory;
+    public $table = 'toys';
 
-    protected $fillable = [
+    public $fillable = [
         'title',
         'description',
         'slug',
         'image'
     ];
 
-    public function tasks()
+    protected $casts = [
+        'title' => 'string',
+        'description' => 'string',
+        'slug' => 'string',
+        'image' => 'string'
+    ];
+
+    public static $rules = [
+        'title' => 'required|string',
+        'description' => 'nullable|string',
+        'slug' => 'required|string',
+        'created_at' => 'nullable',
+        'updated_at' => 'nullable',
+        'image' => 'nullable|string'
+    ];
+
+    public function tasks(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(Task::class, 'task_toy');
+        return $this->belongsToMany(\App\Models\Task::class, 'task_toy');
     }
 
     protected $with = ['image'];
@@ -29,9 +44,4 @@ class Toy extends Model
     {
         return $this->hasOne(Media::class, 'id', 'image');
     }
-
-//    public function thumbnail(): HasOne
-//    {
-//        return $this->hasOne(Media::class, 'id', 'thumbnail');
-//    }
 }

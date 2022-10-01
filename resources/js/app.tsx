@@ -1,33 +1,35 @@
-import './bootstrap';
-import '../css/app.css';
-
 import React from 'react';
-import {createInertiaApp} from '@inertiajs/inertia-react';
-import {InertiaProgress} from '@inertiajs/progress';
-import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
-import {createRoot} from "react-dom/client";
-import 'clockwork-browser/toolbar'
+import {Route, Routes} from 'react-router-dom';
+import Dashboard from "./pages/Dashboard";
+import Login from "./pages/auth/Login";
+import Register from "./Pages/Auth/Register";
 import CommonLayout from "./Layouts/CommonLayout";
 
-const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
+function App() {
+    //Getting isAuthenticated store value from Authentication reducer.
+    // const {isAuthenticated, validateUserLoader} = useSelector(state => state.authenticateReducer)
 
-createInertiaApp({
-        title: (title) => `${title} - ${appName}`,
-        resolve: async (name) => {
-            const resolvedPageModule = await resolvePageComponent<any>(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx'));
-            const resolvedPage = resolvedPageModule.default;
-            resolvedPage.layout = (page: any)=><CommonLayout>{page}</CommonLayout>;
-            return resolvedPage;
-        },
-        setup({el, App, props}) {
-            const root = createRoot(el); // createRoot(container!) if you use TypeScript
-            return root.render(<App {...props} />);
-        },
-    }
-);
+    // const {userInfo: user} = useSelector((state) => state.user);
+    //const dispatch = useDispatch();
 
-InertiaProgress.init(
-    {
-        color: '#4B5563'
-    }
-);
+    // useEffect(() => {
+    //     if (!isAuthenticated) {
+    //         dispatch({
+    //             type: actions.GET_AUTH_USER,
+    //         });
+    //     }
+    // }, [])
+
+    // if (validateUserLoader) {
+    //     return <Spinner/>;
+    // }
+    return <Routes>
+        <Route path="/" element={<CommonLayout/>}>
+            <Route index element={<Dashboard/>}/>
+            <Route path='login' element={<Login/>}/>
+            <Route path='register' element={<Register/>}/>
+        </Route>
+    </Routes>
+}
+
+export default App;

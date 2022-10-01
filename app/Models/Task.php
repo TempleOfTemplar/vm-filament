@@ -2,19 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Overtrue\LaravelFavorite\Traits\Favoriteable;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\Tags\HasTags;
 
-class Task extends Model implements HasMedia
+class Task extends Model
 {
-    use HasFactory, InteractsWithMedia, HasTags, Favoriteable;
+    public $table = 'tasks';
 
-    protected $fillable = [
+    public $fillable = [
         'title',
         'excerpt',
         'category_id',
@@ -23,28 +18,41 @@ class Task extends Model implements HasMedia
         'content',
         'is_published'
     ];
+
     protected $casts = [
+        'title' => 'string',
+        'excerpt' => 'string',
+        'slug' => 'string',
+        'content' => 'string',
         'is_published' => 'boolean'
     ];
 
+    public static $rules = [
+        'title' => 'required|string',
+        'excerpt' => 'required|string',
+        'category_id' => 'required',
+        'author_id' => 'required',
+        'slug' => 'required|string',
+        'content' => 'required|string',
+        'is_published' => 'required|boolean',
+        'created_at' => 'nullable',
+        'updated_at' => 'nullable'
+    ];
 
-    public function category()
+    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(\App\Models\Category::class, 'category_id');
     }
 
-    public function toys()
+    public function author(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsToMany(Toy::class, 'task_toy');
+        return $this->belongsTo(\App\Models\User::class, 'author_id');
     }
 
-
-    public function author()
+    public function toys(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsTo(User::class, 'author_id');
+        return $this->belongsToMany(\App\Models\Toy::class, 'task_toy');
     }
-
-    protected $with = [];
 
     protected static function boot()
     {
@@ -58,5 +66,4 @@ class Task extends Model implements HasMedia
             $model->author_id = Auth::id();
         });
     }
-
 }

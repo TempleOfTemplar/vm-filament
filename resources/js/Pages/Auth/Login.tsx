@@ -1,5 +1,4 @@
-import React, {useEffect} from 'react';
-import {useForm} from '@inertiajs/inertia-react';
+import React, {useEffect, useState} from 'react';
 import {
     Button,
     Checkbox,
@@ -12,8 +11,10 @@ import {
     Text,
     TextInput,
 } from '@mantine/core';
-import VkontakteButton from "../../Components/VkontakteButton";
-import GoogleButton from "../../Components/GoogleButton";
+import {useDispatch, useSelector} from "react-redux";
+import {useNavigate} from 'react-router-dom';
+import {reset, signin} from "../../redux/slices/authSlice";
+import {showNotification} from '@mantine/notifications';
 
 const useStyles = createStyles((theme) => ({
     socialLoginButtonIcon: {
@@ -22,27 +23,42 @@ const useStyles = createStyles((theme) => ({
     }
 }));
 
-export default function Login({status, canResetPassword}) {
+export default function Login() {
     const {classes, theme, cx} = useStyles();
-    const {data, setData, post, processing, errors, reset} = useForm({
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const {user, isLoading, isSuccess, isError, message} = useSelector(state => state.auth);
+
+    const [formData, setFormData] = useState({
         email: '',
         password: '',
-        remember: false,
-    });
-
+        remember: false
+    })
     useEffect(() => {
-        return () => {
-            reset('password');
-        };
-    }, []);
+        if (isError) {
+            showNotification({
+                title: 'Ошибка',
+                message,
+            })
+            // toast.error(message)
+        }
+        if (isSuccess && user) {
+            navigate('/');
+        }
 
-    const onHandleChange = (event) => {
-        setData(event.target.name, event.target.type === 'checkbox' ? event.target.checked : event.target.value);
+        dispatch(reset())
+    }, [user, isSuccess, isError, message, navigate, dispatch])
+
+    const onHandleChange = (event: any) => {
+        // setData(event.target.name, event.target.type === 'checkbox' ? event.target.checked : event.target.value);
+        event.preventDefault();
+        const user: any = {...formData};
+        dispatch(signin(user))
     };
 
-    const submit = (e) => {
+    const submit = (e: any) => {
         e.preventDefault();
-        post(route('login'));
     };
 
     return (
@@ -52,8 +68,8 @@ export default function Login({status, canResetPassword}) {
             </Text>
 
             <Group grow mb="md" mt="md">
-                <GoogleButton href={route('auth.google')} radius="xl">Google</GoogleButton>
-                <VkontakteButton href={route('auth.vk')} radius="xl">Vkontakte</VkontakteButton>
+                {/*<GoogleButton href={route('auth.google')} radius="xl">Google</GoogleButton>*/}
+                {/*<VkontakteButton href={route('auth.vk')} radius="xl">Vkontakte</VkontakteButton>*/}
             </Group>
 
             <Divider label="Or continue with email" labelPosition="center" my="lg"/>
@@ -65,9 +81,8 @@ export default function Login({status, canResetPassword}) {
                         label="Email"
                         name="email"
                         placeholder="Your email"
-                        value={data.email}
+                        value={formData.email}
                         onChange={onHandleChange}
-                        error={errors.email}
                     />
 
                     <PasswordInput
@@ -75,15 +90,14 @@ export default function Login({status, canResetPassword}) {
                         label="Password"
                         name="password"
                         placeholder="Your password"
-                        value={data.password}
+                        value={formData.password}
                         onChange={onHandleChange}
-                        error={errors.password}
                     />
 
                     <Checkbox
                         name="remember"
                         label="Remember me"
-                        checked={data.remember}
+                        checked={formData.remember}
                         onChange={onHandleChange}
                     />
                 </Stack>
