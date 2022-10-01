@@ -17,4 +17,5 @@ export interface Task {
     author?: User | null;
     toys?: Array<Toy> | null;
     toys_count?: number | null;
+    has_favorited?: boolean;
 }

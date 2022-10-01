@@ -1,6 +1,5 @@
 import React, {ChangeEvent, useEffect, useState} from 'react';
 import {usePage} from "@inertiajs/inertia-react";
-import {Inertia} from "@inertiajs/inertia";
 import TaskCard from "../../Components/TaskCard";
 import {
     Affix,
@@ -20,22 +19,37 @@ import useDebounce from "../../Hooks/useDebounce";
 import {Task} from "../../Models/Task";
 import {Flipped, Flipper} from "react-flip-toolkit";
 import {Tag} from "../../Models/Tag";
+import {Toy} from "../../Models/Toy";
+import {Category} from "../../Models/Category";
+import api from "../../utils/Api";
 
 
 //href={route("tasks.edit", id)}
 const ListTasks = () => {
-    const page = usePage().props as any;
-    console.log("page", page);
-    const {tasks, toys, categories, tags} = page;
-    const [tasksList, setTasksList] = useState<Task[]>(tasks);
-    console.log("TASKS", tasks);
-    const toysItems = toys ? toys.map(toy => {
+    const [tasksList, setTasksList] = useState<Task[]>([]);
+    const [toys, setToys] = React.useState([]);
+    const [categories, setCategories] = React.useState([]);
+    const [tags, setTags] = React.useState([]);
+
+    useEffect(() => {
+        api().get("/api/tasks")
+            .then((res) => {
+                setTasksList(res.data.data);
+                console.log("DATA", res.data);
+                // setSecret(res.data.secret);
+            })
+            .catch((err) => {
+                // setSecret("");
+            });
+    }, []);
+
+    const toysItems = toys ? toys.map((toy: Toy) => {
         return {value: toy.id, label: toy.title};
     }) : [];
-    const categoriesItems = categories ? categories.map(category => {
+    const categoriesItems = categories ? categories.map((category: Category) => {
         return {value: category.id, label: category.title};
     }) : [];
-    const tagsItems = tags ? tags.map(tag => {
+    const tagsItems = tags ? tags.map((tag: Tag) => {
         return {value: tag.id, label: tag.name.ru};
     }) : [];
     const [searchQuery, setSearchQuery] = useState<string>("");
@@ -85,10 +99,10 @@ const ListTasks = () => {
         //         replace: true,
         //     }
         // );
-        console.log("tagsFilter", tagsFilter);
-        const sortedTasks = tagsFilter ? shuffle(tasksList) : tasksList;
-        console.log("sortedTasks", sortedTasks);
-        setTasksList(sortedTasks);
+        // console.log("tagsFilter", tagsFilter);
+        // const sortedTasks = tagsFilter ? shuffle(tasksList) : tasksList;
+        // console.log("sortedTasks", sortedTasks);
+        // setTasksList(sortedTasks);
     }, [debouncedSearchQuery, toysFilter, categoryFilter, tagsFilter]);
 
     function onSearchQueryChange(e: ChangeEvent<HTMLInputElement>) {
@@ -108,7 +122,7 @@ const ListTasks = () => {
     }
 
     function setFavorite(task: Task) {
-        Inertia.patch(route('tasks.setFavorite', task.id), {to: true});
+        // Inertia.patch(route('tasks.setFavorite', task.id), {to: true});
     }
 
     return (
@@ -137,12 +151,13 @@ const ListTasks = () => {
                     <Space h="md"/>
                     <div className="overflow-x-auto bg-white rounded shadow">
                         <SimpleGrid cols={3}>
-                                    {tasksList ? tasksList.map((task: Task) => (
-                                        <Flipped flipId={task.id}  key={task.id}><TaskCard task={task} setFavorite={setFavorite}/></Flipped>
-                                    )) : null}
-                                    {tasksList.length === 0 && (
-                                        <div>Ничего не найдено.</div>
-                                    )}
+                            {tasksList ? tasksList.map((task: Task) => (
+                                <Flipped flipId={task.id} key={task.id}><TaskCard task={task}
+                                                                                  setFavorite={setFavorite}/></Flipped>
+                            )) : null}
+                            {tasksList.length === 0 && (
+                                <div>Ничего не найдено.</div>
+                            )}
                         </SimpleGrid>
 
                     </div>
@@ -152,7 +167,7 @@ const ListTasks = () => {
             <Affix position={{bottom: 40, right: 20}}>
                 <Button
                     component='a'
-                    href={route("tasks.add")}
+                    href={'tasks/add'}
                     leftIcon={<IconCirclePlus size={16}/>}
                 >
                     Добавить задание

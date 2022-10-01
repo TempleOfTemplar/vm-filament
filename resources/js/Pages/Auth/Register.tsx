@@ -1,88 +1,59 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {Button, Group, TextInput,} from '@mantine/core';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
-import {showNotification} from "@mantine/notifications";
-import {reset, signup} from "../../redux/slices/authSlice";
+import {useForm} from "@mantine/form";
+import {withSanctum} from "react-sanctum";
+import axios from "axios";
 
-export default function Register() {
+const Register = ({setUser}) => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
-    const {user, isLoading, isSuccess, isError, message} = useSelector(state => state.auth);
+    // const { loading, userInfo, error, success } = useSelector(
+    //     (state) => state.user
+    // )
 
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    })
+    const form = useForm({
+        initialValues: {
+            name: '',
+            email: '',
+            password: ''
+        },
 
-    const {name, email, password, password_confirmation} = formData;
+        validate: {
+            email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+        },
+    });
 
-    useEffect(() => {
-        if (isError) {
-            showNotification({
-                title: 'Ошибка',
-                message,
+    function onSubmit(values: any) {
+        console.log("WTF2");
+        axios
+            .post(`/register`, values)
+            .then(function (response) {
+                const user = response.data;
+                setUser(user); // The react-sanctum setUser function
+                authenticatedCallback();
             })
-        }
-        if (isSuccess && user) {
-            navigate('/');
-        }
-
-        dispatch(reset())
-
-    }, [user, isSuccess, isError, message, navigate, dispatch])
-
-    const handleChange = (e: any) => {
-        setFormData((prevState) => ({
-            ...prevState,
-            [e.target.name]: e.target.value
-        }))
+            .catch(function (error) {
+            });
     }
 
-    const handleSubmit = (e: any) => {
-        e.preventDefault();
-        if (password !== password_confirmation) {
-            showNotification({
-                title: 'Ошибка',
-                message: 'Пароли не совпадают',
-            })
-        } else if (password.length < 6) {
-            // showNotification({
-            //     title: 'Ошибка',
-            //     message: 'Пароли не совпадают',
-            // })
-        } else {
-            const user = {
-                name,
-                email,
-                password,
-                password_confirmation,
-            }
-            dispatch(signup(user))
-        }
-        const data = new FormData(e.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
-    };
+    const authenticatedCallback = () => {
+        // let {from} = location.state || {from: {pathname: '/tasks'}}
+        navigate(`/tasks`);
+    }
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
             <div>
                 {/*<InputLabel forInput="name" value="Name"/>*/}
 
                 <TextInput
                     type="text"
                     name="name"
-                    value={name}
                     label="Имя"
                     className="mt-1 block w-full"
                     autoComplete="name"
-                    onChange={handleChange}
+                    {...form.getInputProps('name')}
                     required
                 />
 
@@ -96,10 +67,9 @@ export default function Register() {
                     type="email"
                     name="email"
                     label="Email"
-                    value={email}
                     className="mt-1 block w-full"
                     autoComplete="username"
-                    onChange={handleChange}
+                    {...form.getInputProps('email')}
                     required
                 />
 
@@ -110,27 +80,18 @@ export default function Register() {
                 type="password"
                 name="password"
                 label='Пароль'
-                value={password}
                 className="mt-1 block w-full"
                 autoComplete="new-password"
-                onChange={handleChange}
-                required
-            />
-            <TextInput
-                type="password"
-                label='Пароль ещё раз'
-                name="password_confirmation"
-                value={password_confirmation}
-                className="mt-1 block w-full"
-                onChange={handleChange}
+                {...form.getInputProps('password')}
                 required
             />
 
             <Group position="apart" mt="xl">
-                <Button className="ml-4" loading={isLoading}>
+                <Button className="ml-4" type={"submit"} loading={false}>
                     Register
                 </Button>
             </Group>
         </form>
     );
 }
+export default withSanctum(Register);

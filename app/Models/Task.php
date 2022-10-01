@@ -4,9 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Overtrue\LaravelFavorite\Traits\Favoriteable;
+use Spatie\Tags\HasTags;
 
 class Task extends Model
 {
+    use HasTags;
+    use Favoriteable;
     public $table = 'tasks';
 
     public $fillable = [
@@ -53,6 +57,7 @@ class Task extends Model
     {
         return $this->belongsToMany(\App\Models\Toy::class, 'task_toy');
     }
+
 
     protected static function boot()
     {

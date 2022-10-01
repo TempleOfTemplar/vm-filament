@@ -162,7 +162,7 @@ const TaskCard: FC<TaskCardProps> = ({task, setFavorite}) => {
                 </Group> : null}
 
                 <Group mt="xs">
-                    <Button component="a" radius="md" style={{flex: 1}} href={route('tasks.show', task)}>
+                    <Button component="a" radius="md" style={{flex: 1}} href={`tasks/${task.id}}`}>
                         Читать
                     </Button>
                     <ActionIcon variant="default" radius="md" size={36}

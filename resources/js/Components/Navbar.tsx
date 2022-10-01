@@ -4,6 +4,7 @@ import {useDisclosure} from '@mantine/hooks';
 import {IconChevronDown, IconTrash,} from '@tabler/icons';
 import ApplicationLogo from "./ApplicationLogo";
 import DarkThemeToggle from "./DarkThemeToggle";
+import {withSanctum} from "react-sanctum";
 
 const HEADER_HEIGHT = 60;
 const useStyles = createStyles((theme) => ({
@@ -156,10 +157,10 @@ const Navbar: FC<NavbarProps> = ({user}) => {
                             {/*<Menu.Item icon={<IconPlayerPause size={14} stroke={1.5}/>}>*/}
                             {/*    Pause subscription*/}
                             {/*</Menu.Item>*/}
-                            <Menu.Item component='a' href={route("tasks.favorite")}>
+                            <Menu.Item component='a' href={'/tasks/favorite'}>
                                 Избранные задания
                             </Menu.Item>
-                            <Menu.Item component='a' href={route("tasks.my")}>
+                            <Menu.Item component='a' href={'/tasks/my'}>
                                 Мои задания
                             </Menu.Item>
                             <Menu.Item color="red">
@@ -176,4 +177,4 @@ const Navbar: FC<NavbarProps> = ({user}) => {
     );
 };
 
-export default Navbar;
+export default withSanctum(Navbar);

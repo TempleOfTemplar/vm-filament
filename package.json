@@ -39,11 +39,10 @@
         "@emotion/react": "^11.10.4",
         "@mantine/carousel": "^5.4.0",
         "@mantine/core": "^5.4.0",
-        "@mantine/form": "^5.4.0",
+        "@mantine/form": "^5.4.2",
         "@mantine/hooks": "^5.4.0",
         "@mantine/modals": "^5.4.0",
         "@mantine/notifications": "^5.4.0",
-        "@reduxjs/toolkit": "^1.8.5",
         "@tabler/icons": "^1.96.0",
         "axios": "^0.27.2",
         "classnames": "^2.3.2",
@@ -54,7 +53,8 @@
         "react-dom": "^18.2.0",
         "react-editor-js": "^2.1.0",
         "react-flip-toolkit": "^7.0.16",
-        "react-redux": "^8.0.4",
-        "react-router-dom": "^6.4.1"
+        "react-hook-form": "^7.36.1",
+        "react-router-dom": "^6.4.1",
+        "react-sanctum": "^2.3.1"
     }
 }

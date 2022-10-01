@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
     Button,
     Checkbox,
@@ -11,10 +11,9 @@ import {
     Text,
     TextInput,
 } from '@mantine/core';
-import {useDispatch, useSelector} from "react-redux";
-import {useNavigate} from 'react-router-dom';
-import {reset, signin} from "../../redux/slices/authSlice";
-import {showNotification} from '@mantine/notifications';
+import {useForm} from "@mantine/form";
+import {useSanctum} from "react-sanctum";
+import {useLocation, useNavigate} from 'react-router-dom';
 
 const useStyles = createStyles((theme) => ({
     socialLoginButtonIcon: {
@@ -23,43 +22,37 @@ const useStyles = createStyles((theme) => ({
     }
 }));
 
-export default function Login() {
+const Login = ()=> {
     const {classes, theme, cx} = useStyles();
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
 
-    const {user, isLoading, isSuccess, isError, message} = useSelector(state => state.auth);
+    const {authenticated, user, signIn} = useSanctum();
+    let location = useLocation();
+    let navigate = useNavigate();
 
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-        remember: false
-    })
-    useEffect(() => {
-        if (isError) {
-            showNotification({
-                title: 'Ошибка',
-                message,
+    const form = useForm({
+        initialValues: {
+            email: '',
+            password: '',
+            remember: false
+        },
+
+        validate: {
+            email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Неверный email'),
+            password: (value) => value.length > 0 ? null : "Пожалуйста введите пароль",
+        },
+    });
+    const authenticatedCallback = () => {
+        // let {from} = location.state || {from: {pathname: '/tasks'}}
+        navigate(`/tasks`);
+    }
+
+    function onSubmit(values: any) {
+        signIn(values.email, values.password, values.remember)
+            .then(() => {
+               authenticatedCallback();
             })
-            // toast.error(message)
-        }
-        if (isSuccess && user) {
-            navigate('/');
-        }
-
-        dispatch(reset())
-    }, [user, isSuccess, isError, message, navigate, dispatch])
-
-    const onHandleChange = (event: any) => {
-        // setData(event.target.name, event.target.type === 'checkbox' ? event.target.checked : event.target.value);
-        event.preventDefault();
-        const user: any = {...formData};
-        dispatch(signin(user))
-    };
-
-    const submit = (e: any) => {
-        e.preventDefault();
-    };
+            .catch(() => window.alert("Incorrect email or password"));
+    }
 
     return (
         <Paper radius="md" p="xl" withBorder>
@@ -74,15 +67,14 @@ export default function Login() {
 
             <Divider label="Or continue with email" labelPosition="center" my="lg"/>
 
-            <form onSubmit={submit}>
+            <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
                 <Stack>
                     <TextInput
                         required
                         label="Email"
                         name="email"
                         placeholder="Your email"
-                        value={formData.email}
-                        onChange={onHandleChange}
+                        {...form.getInputProps('email')}
                     />
 
                     <PasswordInput
@@ -90,15 +82,13 @@ export default function Login() {
                         label="Password"
                         name="password"
                         placeholder="Your password"
-                        value={formData.password}
-                        onChange={onHandleChange}
+                        {...form.getInputProps('password')}
                     />
 
                     <Checkbox
                         name="remember"
                         label="Remember me"
-                        checked={formData.remember}
-                        onChange={onHandleChange}
+                        {...form.getInputProps('remember', {type: 'checkbox'})}
                     />
                 </Stack>
 
@@ -109,3 +99,5 @@ export default function Login() {
         </Paper>
     );
 }
+
+export default Login;
