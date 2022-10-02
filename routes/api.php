@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 
 Route::resource('tasks', App\Http\Controllers\API\TaskAPIController::class)
@@ -30,3 +27,4 @@ Route::resource('categories', App\Http\Controllers\API\CategoryAPIController::cl
 
 Route::resource('tags', App\Http\Controllers\API\TagAPIController::class)
     ->except(['create', 'edit']);
+

@@ -27,7 +27,7 @@ const Register = ({setUser}) => {
     function onSubmit(values: any) {
         console.log("WTF2");
         axios
-            .post(`/register`, values)
+            .post(`api/register`, values)
             .then(function (response) {
                 const user = response.data;
                 setUser(user); // The react-sanctum setUser function

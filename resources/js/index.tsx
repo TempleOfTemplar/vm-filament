@@ -3,6 +3,9 @@ import {createRoot} from 'react-dom/client';
 import App from './App';
 import {BrowserRouter, Link} from "react-router-dom";
 import {Sanctum} from "react-sanctum";
+import {QueryParamProvider} from 'use-query-params';
+import {ReactRouter6Adapter} from 'use-query-params/adapters/react-router-6';
+import {Provider} from "react-redux";
 
 const container = document.getElementById('app')!;
 const root = createRoot(container);
@@ -14,14 +17,14 @@ const sanctumConfig = {
     signOutRoute: "logout",
     userObjectRoute: "user",
 };
-console.log("WTF");
-
 root.render(
+    // <Provider store={store}>
     <Sanctum config={sanctumConfig}>
         <BrowserRouter>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-            <App/>
+            <QueryParamProvider adapter={ReactRouter6Adapter}>
+                <App/>
+            </QueryParamProvider>
         </BrowserRouter>
     </Sanctum>
+    // </Provider>
 );

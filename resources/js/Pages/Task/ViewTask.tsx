@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useMemo, useState} from 'react';
 import {
     Avatar,
     Badge,
@@ -23,24 +23,25 @@ const edjsParser = edjsHTML();
 
 const useStyles = createStyles((theme) => ({}));
 
-//href={route("tasks.edit", id)}
 const ViewTask: FC<any> = () => {
     const [task, setTask] = useState();
-    let {id} = useParams<"id">();
+    let {taskId} = useParams();
     useEffect(() => {
-        api().get(`/api/tasks/${id}`)
+        api().get(`/api/tasks/${taskId}`)
             .then((res) => {
                 setTask(res.data.data);
-                if (task) {
-                    const html = edjsParser.parse(JSON.parse(task.content)).join("");
-                }
             })
             .catch((err) => {
             });
     }, []);
     const {classes, theme} = useStyles();
 
-    const html = '';
+    const html = useMemo(() => {
+        if (task?.content) {
+            return edjsParser.parse(JSON.parse(task.content)).join("");
+        }
+        return '';
+    }, [task]);
 
     return (
         <Container p={0}>
@@ -77,24 +78,24 @@ const ViewTask: FC<any> = () => {
                         <Carousel
                             withIndicators
                             height={200}
-                            slideSize="25%"
+                            mx="auto"
+                            slideSize="20%"
                             slideGap="sm"
                             breakpoints={[
                                 {maxWidth: 'md', slideSize: '50%'},
                                 {maxWidth: 'sm', slideSize: '100%', slideGap: 0},
                             ]}
-                            loop
                             align="start"
                         >
                             {task.toys.map((toy: Toy) => (
                                 <Carousel.Slide key={toy.title}>
                                     <Paper shadow="md" radius="md" p="sm">
-                                        <Image
+                                        {toy.image ? <Image
                                             width={100}
                                             radius="md"
                                             src={toy.image.thumbnail_url}
                                             alt={toy.image.alt}
-                                        />
+                                        /> : null}
                                         <Text size="lg" weight={500} mt="md">
                                             {toy.title}
                                         </Text>
@@ -104,7 +105,6 @@ const ViewTask: FC<any> = () => {
                                     </Paper>
                                 </Carousel.Slide>
                             ))}
-                            {/* ...other slides */}
                         </Carousel>
                     </>
                     : null}

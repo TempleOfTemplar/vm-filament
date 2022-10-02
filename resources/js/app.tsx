@@ -8,6 +8,8 @@ import FavoritedTasks from "./Pages/Task/FavoritedTasks";
 import ListMyTasks from "./Pages/Task/ListMyTasks";
 import ListTasks from "./Pages/Task/ListTasks";
 import ViewTask from "./Pages/Task/ViewTask";
+import EditTask from "./Pages/Task/EditTask";
+import CreateTask from "./Pages/Task/CreateTask";
 
 function App() {
     //Getting isAuthenticated store value from Authentication reducer.
@@ -34,7 +36,9 @@ function App() {
             <Route path='register' element={<Register/>}/>
             <Route path="tasks">
                 <Route path='' element={<ListTasks/>}/>
-                <Route path=':id' element={<ViewTask/>}/>
+                <Route path='add' element={<CreateTask/>}/>
+                <Route path=':taskId' element={<ViewTask/>}/>
+                <Route path='edit/:taskId' element={<EditTask/>}/>
                 <Route path='favorite' element={<FavoritedTasks/>}/>
                 <Route path='my' element={<ListMyTasks/>}/>
             </Route>

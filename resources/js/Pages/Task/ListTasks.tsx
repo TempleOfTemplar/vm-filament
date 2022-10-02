@@ -1,5 +1,4 @@
 import React, {ChangeEvent, useEffect, useState} from 'react';
-import {usePage} from "@inertiajs/inertia-react";
 import TaskCard from "../../Components/TaskCard";
 import {
     Affix,
@@ -22,35 +21,93 @@ import {Tag} from "../../Models/Tag";
 import {Toy} from "../../Models/Toy";
 import {Category} from "../../Models/Category";
 import api from "../../utils/Api";
+import {useSearchParams} from "react-router-dom";
+import {ArrayParam, StringParam, useQueryParams} from "use-query-params";
 
 
 //href={route("tasks.edit", id)}
 const ListTasks = () => {
     const [tasksList, setTasksList] = useState<Task[]>([]);
-    const [toys, setToys] = React.useState([]);
-    const [categories, setCategories] = React.useState([]);
-    const [tags, setTags] = React.useState([]);
+    const [toysList, setToys] = React.useState([]);
+    const [categoriesList, setCategoriesList] = React.useState([]);
+    const [tagsList, setTagsList] = React.useState([]);
 
+    let [searchParams, setSearchParams] = useSearchParams();
+
+    const [query, setQuery] = useQueryParams({
+        search: StringParam,
+        category: StringParam,
+        toys: ArrayParam,
+        tags: ArrayParam,
+    });
+    const {search, category, toys, tags} = query;
     useEffect(() => {
         api().get("/api/tasks")
             .then((res) => {
                 setTasksList(res.data.data);
-                console.log("DATA", res.data);
-                // setSecret(res.data.secret);
             })
             .catch((err) => {
-                // setSecret("");
+            });
+
+        api().get("/api/toys")
+            .then((res) => {
+                setToys(res.data.data);
+            })
+            .catch((err) => {
+            });
+
+        api().get("/api/tags")
+            .then((res) => {
+                setTagsList(res.data.data);
+            })
+            .catch((err) => {
+            });
+        api().get("/api/categories")
+            .then((res) => {
+                setCategoriesList(res.data.data);
+            })
+            .catch((err) => {
             });
     }, []);
 
-    const toysItems = toys ? toys.map((toy: Toy) => {
+    // из queryParams в контролы
+    useEffect(() => {
+        const queryParamsData: any = {};
+
+        if (search?.length) {
+            setSearchQuery(search);
+            queryParamsData.search = search;
+        }
+        if (category) {
+            setCategoryFilter(Number(category));
+            queryParamsData.category = category;
+        }
+        if (toys?.length) {
+            setToysFilter(toys.map(toyId => Number(toyId)));
+            queryParamsData.toys = toys;
+        }
+        if (tags?.length) {
+            setTagsFilter(tags.map(tagId => Number(tagId)));
+            queryParamsData.tags = tags;
+        }
+        console.log("queryParamsData", queryParamsData);
+        api().get("/api/tasks", {params: queryParamsData})
+            .then((res) => {
+                setTasksList(res.data.data);
+            })
+            .catch((err) => {
+            });
+    }, [search, category, toys, tags]);
+
+
+    const toysItems = toysList ? toysList.map((toy: Toy) => {
         return {value: toy.id, label: toy.title};
     }) : [];
-    const categoriesItems = categories ? categories.map((category: Category) => {
+    const categoriesItems = categoriesList ? categoriesList.map((category: Category) => {
         return {value: category.id, label: category.title};
     }) : [];
-    const tagsItems = tags ? tags.map((tag: Tag) => {
-        return {value: tag.id, label: tag.name.ru};
+    const tagsItems = tagsList ? tagsList.map((tag: Tag) => {
+        return {value: tag.id, label: JSON.parse(tag.name).ru};
     }) : [];
     const [searchQuery, setSearchQuery] = useState<string>("");
     const debouncedSearchQuery = useDebounce<string>(searchQuery, 500)
@@ -77,32 +134,30 @@ const ListTasks = () => {
         return array;
     }
 
+    // из контролов в queryParams
     useEffect(() => {
-        // const queryParamsData: any = {};
-        // if (searchQuery?.length) {
-        //     queryParamsData.search = searchQuery;
-        // }
-        // if (toysFilter?.length) {
-        //     queryParamsData.toys = toysFilter;
-        // }
-        // if (tagsFilter?.length) {
-        //     queryParamsData.tags = tagsFilter;
-        // }
-        // if (categoryFilter) {
-        //     queryParamsData.category = categoryFilter;
-        // }
-        // Inertia.get(
-        //     route(route().current()),
-        //     queryParamsData,
-        //     {
-        //         preserveState: true,
-        //         replace: true,
-        //     }
-        // );
-        // console.log("tagsFilter", tagsFilter);
-        // const sortedTasks = tagsFilter ? shuffle(tasksList) : tasksList;
-        // console.log("sortedTasks", sortedTasks);
-        // setTasksList(sortedTasks);
+        const qsParams: any = {};
+        if (debouncedSearchQuery) {
+            qsParams.search = debouncedSearchQuery;
+        } else {
+            qsParams.search = null;
+        }
+        if (toysFilter) {
+            qsParams.toys = toysFilter;
+        } else {
+            qsParams.toys = null;
+        }
+        if (categoryFilter) {
+            qsParams.category = categoryFilter;
+        } else {
+            qsParams.category = null;
+        }
+        if (tagsFilter) {
+            qsParams.tags = tagsFilter;
+        } else {
+            qsParams.tags = null;
+        }
+        setQuery(qsParams);
     }, [debouncedSearchQuery, toysFilter, categoryFilter, tagsFilter]);
 
     function onSearchQueryChange(e: ChangeEvent<HTMLInputElement>) {
@@ -141,11 +196,11 @@ const ListTasks = () => {
                                 value={searchQuery}
                                 onChange={onSearchQueryChange}
                             />
-                            <Select onChange={onCategoryFilterChange} data={categoriesItems}/>
+                            <Select value={categoryFilter} onChange={onCategoryFilterChange} data={categoriesItems}/>
                         </Group>
                         <Group dir='row' className="filters" grow>
-                            <MultiSelect onChange={onToysFilterChange} data={toysItems}/>
-                            <MultiSelect onChange={onTagsFilterChange} data={tagsItems}/>
+                            <MultiSelect value={toysFilter} onChange={onToysFilterChange} data={toysItems}/>
+                            <MultiSelect value={tagsFilter} onChange={onTagsFilterChange} data={tagsItems}/>
                         </Group>
                     </Stack>
                     <Space h="md"/>

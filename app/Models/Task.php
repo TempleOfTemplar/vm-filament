@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use FilamentCurator\Models\Media;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Auth;
 use Overtrue\LaravelFavorite\Traits\Favoriteable;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
 
 class Task extends Model
 {
     use HasTags;
     use Favoriteable;
+
     public $table = 'tasks';
 
     public $fillable = [

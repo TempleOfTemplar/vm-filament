@@ -24,7 +24,6 @@ const useStyles = createStyles((theme) => ({
 
 const Login = ()=> {
     const {classes, theme, cx} = useStyles();
-
     const {authenticated, user, signIn} = useSanctum();
     let location = useLocation();
     let navigate = useNavigate();

@@ -6,6 +6,8 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Models\Category;
 use App\Models\Task;
 use App\Models\Toy;
+use App\Repositories\TaskRepository;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
@@ -15,18 +17,24 @@ use Spatie\Tags\Tag;
 
 class TaskController extends Controller
 {
+    private TaskRepository $taskRepository;
+
+    public function __construct(TaskRepository $taskRepo)
+    {
+        $this->taskRepository = $taskRepo;
+    }
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Inertia\Response
+     * Display a listing of the Tasks.
+     * GET|HEAD /tasks
      */
-    public function index()
+    public function index(\Illuminate\Http\Request $request): JsonResponse
     {
         $searchQuery = Request::input('search');
         $toysFilter = Request::input('toys');
         $tagsFilter = Request::input('tags');
         $tasks = Task::query()
-            ->where("is_published",1)
+            ->where("is_published", 1)
             ->when($searchQuery, function ($query, $search) {
                 $query->where('title', 'like', '%' . $search . '%')
                     ->OrWhere('excerpt', 'like', '%' . $search . '%');
@@ -50,16 +58,19 @@ class TaskController extends Controller
         $categories = Category::all();
         $toys = Toy::all();
         $tags = Tag::all();
-        return Inertia::render('Task/ListTasks',
-            ['tasks' => $tasks,
-                'toys' => $toys,
-                'categories' => $categories,
-                'tags' => $tags]);
+//        $tasks = $this->taskRepository->all(
+//            $request->except(['skip', 'limit']),
+//            $request->get('skip'),
+//            $request->get('limit'),
+//            $request->with('limit')
+//        );
+        // $toReturn = ['tasks' => $tasks->toArray(), 'categories' => $categories->toArray(), 'toys' => $toys->toArray(), 'tags' => $tags->toArray()];
+        return $this->sendResponse($tasks->toArray(), 'Tasks retrieved successfully');
     }
 
     public function myTasks()
     {
-        $tasks = Task::query()->where("author_id", '=',  Auth::id())
+        $tasks = Task::query()->where("author_id", '=', Auth::id())
             ->with('toys')
             ->with('category')
             ->with('tags')
@@ -71,12 +82,13 @@ class TaskController extends Controller
 
     public function favoritedTasks()
     {
-        $favoritedTasks = Auth::user()->getFavoriteItems(Task::class)->where("is_published",1)->get();
+        $favoritedTasks = Auth::user()->getFavoriteItems(Task::class)->where("is_published", 1)->get();
         return Inertia::render('Task/FavoritedTasks',
             ['favoritedTasks' => $favoritedTasks]);
     }
 
-    public function setTaskFavorite(Task $task) {
+    public function setTaskFavorite(Task $task)
+    {
         Auth::user()->toggleFavorite($task);
     }
 

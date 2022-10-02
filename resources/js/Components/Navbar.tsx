@@ -5,6 +5,7 @@ import {IconChevronDown, IconTrash,} from '@tabler/icons';
 import ApplicationLogo from "./ApplicationLogo";
 import DarkThemeToggle from "./DarkThemeToggle";
 import {withSanctum} from "react-sanctum";
+import {Link} from "react-router-dom";
 
 const HEADER_HEIGHT = 60;
 const useStyles = createStyles((theme) => ({
@@ -106,6 +107,7 @@ const Navbar: FC<NavbarProps> = ({user}) => {
     const {classes, theme, cx} = useStyles();
     const [opened, {toggle}] = useDisclosure(false);
     const [userMenuOpened, setUserMenuOpened] = useState(false);
+    console.log("user", user)
 
     return (
         <Header height={HEADER_HEIGHT} mb={24} className={classes.root}>
@@ -157,10 +159,10 @@ const Navbar: FC<NavbarProps> = ({user}) => {
                             {/*<Menu.Item icon={<IconPlayerPause size={14} stroke={1.5}/>}>*/}
                             {/*    Pause subscription*/}
                             {/*</Menu.Item>*/}
-                            <Menu.Item component='a' href={'/tasks/favorite'}>
+                            <Menu.Item component={Link} to={'/tasks/favorite'}>
                                 Избранные задания
                             </Menu.Item>
-                            <Menu.Item component='a' href={'/tasks/my'}>
+                            <Menu.Item component={Link} to={'/tasks/my'}>
                                 Мои задания
                             </Menu.Item>
                             <Menu.Item color="red">
