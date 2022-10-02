@@ -107,7 +107,6 @@ const Navbar: FC<NavbarProps> = ({user}) => {
     const {classes, theme, cx} = useStyles();
     const [opened, {toggle}] = useDisclosure(false);
     const [userMenuOpened, setUserMenuOpened] = useState(false);
-    console.log("user", user)
 
     return (
         <Header height={HEADER_HEIGHT} mb={24} className={classes.root}>

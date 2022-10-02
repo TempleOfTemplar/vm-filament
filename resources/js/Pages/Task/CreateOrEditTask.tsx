@@ -7,11 +7,16 @@ import {Toy} from "../../Models/Toy";
 import {Category} from "../../Models/Category";
 import {useForm} from "@mantine/form";
 import api from "../../utils/Api";
+import {useParams} from "react-router-dom";
 
 const ReactEditorJS = createReactEditorJS()
 
 
-const CreateTask = () => {
+const CreateOrEditTask = () => {
+    let {taskId} = useParams();
+    const editMode = useMemo(() => {
+        return !!taskId;
+    }, [taskId]);
     const form = useForm({
         initialValues: {
             title: '',
@@ -19,7 +24,7 @@ const CreateTask = () => {
             toys: [],
             tags: [],
             category: '',
-            content: ''
+            content: null
         },
 
         validate: {
@@ -58,6 +63,22 @@ const CreateTask = () => {
             })
             .catch((err) => {
             });
+        if (editMode) {
+            api().get(`/api/tasks/${taskId}`)
+                .then((res) => {
+                    const formData = res.data.data;
+                    form.setValues({
+                        title: formData.title,
+                        excerpt: formData.excerpt,
+                        category: formData.category.id,
+                        tags: formData.tags ? formData.tags.map((tag: Tag) => tag.id) : [],
+                        toys: formData.toys ? formData.toys.map((toy: Toy) => toy.id) : [],
+                        content: JSON.parse(formData.content)
+                    });
+                })
+                .catch((err) => {
+                });
+        }
     }, []);
 
 
@@ -82,25 +103,13 @@ const CreateTask = () => {
 
     function handleSubmit(e: any) {
         e.preventDefault();
-        // data.content = editorJsValue;
-        // console.log(data);
-        // post(route("tasks.store"));
-    }
+        console.log("form", form.values);
+        if (editMode) {
 
-    // function handleToysChange(selectedToys: string[]) {
-    //     setSelectedToys(selectedToys);
-    //     setData("toys", selectedToys)
-    // }
-    //
-    // function handleTagsChange(selectedTags: string[]) {
-    //     setSelectedTags(selectedTags);
-    //     setData("tags", selectedTags)
-    // }
-    //
-    // function handleCategoryChange(selectedCategory: string) {
-    //     setSelectedCategory(selectedCategory);
-    //     setData("category", selectedCategory)
-    // }
+        } else {
+
+        }
+    }
 
     function handleInitialize(instance: any) {
         editorCore.current = instance
@@ -155,17 +164,18 @@ const CreateTask = () => {
                 {/*{errors.category}*/}
                 <Input.Wrapper label="Текст задания">
                     <ReactEditorJS
+                        value={form.values.content}
                         onInitialize={handleInitialize}
                         tools={EDITOR_JS_TOOLS}
                         onChange={handleSave}/>
                 </Input.Wrapper>
                 {/*{errors.content}*/}
                 <Group position="right" mt="md">
-                    <Button type={"submit"}>Отправить на модерацию</Button>
+                    <Button type={"submit"}>{editMode ? 'Сохранить' : 'Отправить на модерацию'}</Button>
                 </Group>
             </form>
         </Container>
     );
 };
 
-export default CreateTask;
+export default CreateOrEditTask;
