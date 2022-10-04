@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Task;
 use App\Models\Toy;
 use App\Repositories\TaskRepository;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;

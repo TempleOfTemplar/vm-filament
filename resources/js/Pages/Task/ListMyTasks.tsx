@@ -1,5 +1,4 @@
 import React from 'react';
-import {usePage} from "@inertiajs/inertia-react";
 import TaskCard from "../../Components/TaskCard";
 import {Affix, Button, Container, SimpleGrid, Title} from "@mantine/core";
 import {IconCirclePlus} from "@tabler/icons";

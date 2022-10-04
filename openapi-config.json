@@ -1,0 +1,10 @@
+{
+    "schemaFile": "./swagger.json",
+    "apiFile": "./resources/js/store/emptyApi.ts",
+    "apiImport": "emptySplitApi",
+    "outputFile": "./resources/js/store/commonApi.ts",
+    "exportName": "commonApi",
+    "hooks": true
+}
+
+

@@ -8,6 +8,10 @@ import {Category} from "../../Models/Category";
 import {useForm} from "@mantine/form";
 import api from "../../utils/Api";
 import {useParams} from "react-router-dom";
+import {useGetApiToysQuery} from "@/store/reducers/ToysSlice";
+import {useGetApiCategoriesQuery} from "@/store/reducers/CategoriesSlice";
+import {useGetApiTagsQuery} from "@/store/reducers/TagsSlice";
+import {useGetApiTasksByTaskQuery, useGetApiTasksQuery} from "@/store/reducers/TasksSlice";
 
 const ReactEditorJS = createReactEditorJS()
 
@@ -32,38 +36,34 @@ const CreateOrEditTask = () => {
         },
     });
 
-    const [selectedToys, setSelectedToys] = useState<string[]>();
-    const [selectedTags, setSelectedTags] = useState<string[]>();
-    const [selectedCategory, setSelectedCategory] = useState<string>();
-    const [editorJsValue, setEditorJsValue] = useState();
+    const editorCore = React.useRef(null);
 
-    const [toysList, setToysList] = useState<Toy[]>();
-    const [tagsList, setTagsList] = useState<Tag[]>();
-    const [categoriesList, setCategoriesList] = useState<Category[]>();
 
-    const editorCore = React.useRef(null)
+
+
+    const {
+        isLoading: toysLoading,
+        error: toysError,
+        data: toysList
+    } = useGetApiToysQuery();
+    const {
+        isLoading: categoriesLoading,
+        error: categoriesError,
+        data: categoriesList
+    } = useGetApiCategoriesQuery();
+    const {
+        isLoading: tagsLoading,
+        error: tagsError,
+        data: tagsList
+    } = useGetApiTagsQuery();
 
     useEffect(() => {
-        api().get("/api/toys")
-            .then((res) => {
-                setToysList(res.data.data);
-            })
-            .catch((err) => {
-            });
-
-        api().get("/api/tags")
-            .then((res) => {
-                setTagsList(res.data.data);
-            })
-            .catch((err) => {
-            });
-        api().get("/api/categories")
-            .then((res) => {
-                setCategoriesList(res.data.data);
-            })
-            .catch((err) => {
-            });
         if (editMode) {
+            const {
+                isLoading: taskLoading,
+                error: taskError,
+                data: task
+            } = useGetApiTasksByTaskQuery(taskId);
             api().get(`/api/tasks/${taskId}`)
                 .then((res) => {
                     const formData = res.data.data;

@@ -3,8 +3,10 @@ import TaskCard from "../../Components/TaskCard";
 import {
     Affix,
     Button,
+    Center,
     Container,
     Group,
+    Loader,
     MultiSelect,
     Select,
     SimpleGrid,
@@ -16,97 +18,118 @@ import {
 import {IconCirclePlus, IconSearch} from "@tabler/icons";
 import useDebounce from "../../Hooks/useDebounce";
 import {Task} from "../../Models/Task";
-import {Flipped, Flipper} from "react-flip-toolkit";
 import {Tag} from "../../Models/Tag";
 import {Toy} from "../../Models/Toy";
 import {Category} from "../../Models/Category";
-import api from "../../utils/Api";
-import {useSearchParams} from "react-router-dom";
 import {ArrayParam, StringParam, useQueryParams} from "use-query-params";
-
+import {useSetTaskFavoriteMutation} from "@/store/reducers/TasksSlice";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {editTask, fetchTasks} from "@/services/TasksService";
+import {fetchToys} from "@/services/ToysService";
+import {fetchTags} from "@/services/TagsService";
+import {fetchCategories} from "@/services/CategoriesService";
 
 //href={route("tasks.edit", id)}
 const ListTasks = () => {
-    const [tasksList, setTasksList] = useState<Task[]>([]);
-    const [toysList, setToys] = React.useState([]);
-    const [categoriesList, setCategoriesList] = React.useState([]);
-    const [tagsList, setTagsList] = React.useState([]);
-
-    let [searchParams, setSearchParams] = useSearchParams();
-
+    const queryClient = useQueryClient()
     const [query, setQuery] = useQueryParams({
         search: StringParam,
         category: StringParam,
         toys: ArrayParam,
         tags: ArrayParam,
     });
+    const {mutate: editTaskMutation} = useMutation(editTask, {
+        onSuccess: (data, variables) => {
+            console.log()
+            queryClient.setQueryData(['task', {id: 5}], data)
+        }
+    })
+
     const {search, category, toys, tags} = query;
-    useEffect(() => {
-        api().get("/api/tasks")
-            .then((res) => {
-                setTasksList(res.data.data);
-            })
-            .catch((err) => {
-            });
+    const {
+        isLoading: tasksLoading,
+        error: tasksError,
+        data: tasksList,
+        isFetching: tasksFetching
+    } = useQuery(["tasksList"], fetchTasks);
+    console.log("tasksList" ,tasksList);
+    const {
+        isLoading: toysLoading,
+        error: toysError,
+        data: toysList,
+        isFetching: toysFetching
+    } = useQuery(["toysList"], fetchToys);
+    const {
+        isLoading: tagsLoading,
+        error: tagsError,
+        data: tagsList,
+        isFetching: tagsFetching
+    } = useQuery(["tagsList"], fetchTags);
+    const {
+        isLoading: categoriesLoading,
+        error: categoriesError,
+        data: categoriesList,
+        isFetching: categoriesFetching
+    } = useQuery(["categoriesList"], fetchCategories);
 
-        api().get("/api/toys")
-            .then((res) => {
-                setToys(res.data.data);
-            })
-            .catch((err) => {
-            });
+    // const {
+    //     isLoading: tasksLoading,
+    //     isFetching: tasksFetching,
+    //     error: tasksError,
+    //     data: tasksList
+    // } = useGetApiTasksQuery({
+    //     search,
+    //     category,
+    //     toys,
+    //     tags
+    // });
+    // const {
+    //     isLoading: toysLoading,
+    //     error: toysError,
+    //     data: toysList
+    // } = useGetApiToysQuery();
+    // const {
+    //     isLoading: categoriesLoading,
+    //     error: categoriesError,
+    //     data: categoriesList
+    // } = useGetApiCategoriesQuery();
+    // const {
+    //     isLoading: tagsLoading,
+    //     error: tagsError,
+    //     data: tagsList
+    // } = useGetApiTagsQuery();
 
-        api().get("/api/tags")
-            .then((res) => {
-                setTagsList(res.data.data);
-            })
-            .catch((err) => {
-            });
-        api().get("/api/categories")
-            .then((res) => {
-                setCategoriesList(res.data.data);
-            })
-            .catch((err) => {
-            });
-    }, []);
+    // const [updateIsFavorite, {isLoading: isTaskFavoritedUpdating}] = useSetTaskFavoriteMutation();
+    // const toysOptions = toysData && toysData.map(toy => ({label: toy.attributes.title, value: toy.id}));
+    // const categoriesOptions = categoriesData && categoriesData.map(category => ({
+    //     label: category.attributes.title,
+    //     value: category.id
+    // }));
 
     // из queryParams в контролы
     useEffect(() => {
-        const queryParamsData: any = {};
-
         if (search?.length) {
             setSearchQuery(search);
-            queryParamsData.search = search;
         }
         if (category) {
             setCategoryFilter(Number(category));
-            queryParamsData.category = category;
         }
         if (toys?.length) {
             setToysFilter(toys.map(toyId => Number(toyId)));
-            queryParamsData.toys = toys;
         }
         if (tags?.length) {
             setTagsFilter(tags.map(tagId => Number(tagId)));
-            queryParamsData.tags = tags;
         }
-        console.log("queryParamsData", queryParamsData);
-        api().get("/api/tasks", {params: queryParamsData})
-            .then((res) => {
-                setTasksList(res.data.data);
-            })
-            .catch((err) => {
-            });
     }, [search, category, toys, tags]);
 
 
-    const toysItems = toysList ? toysList.map((toy: Toy) => {
+    const toysItems = toysList?.length ? toysList.map((toy: Toy) => {
         return {value: toy.id, label: toy.title};
     }) : [];
-    const categoriesItems = categoriesList ? categoriesList.map((category: Category) => {
+    const categoriesItems = categoriesList?.length ? categoriesList.map((category: Category) => {
         return {value: category.id, label: category.title};
     }) : [];
-    const tagsItems = tagsList ? tagsList.map((tag: Tag) => {
+    const tagsItems = tagsList?.length ? tagsList.map((tag: Tag) => {
         return {value: tag.id, label: JSON.parse(tag.name).ru};
     }) : [];
     const [searchQuery, setSearchQuery] = useState<string>("");
@@ -177,13 +200,12 @@ const ListTasks = () => {
     }
 
     function setFavorite(task: Task) {
+        updateIsFavorite(task.id.toString());
         // Inertia.patch(route('tasks.setFavorite', task.id), {to: true});
     }
 
     return (
-        <Flipper
-            flipKey={tasksList?.map((tag) => tag.id).join("_")}
-        >
+        <>
             <Container>
                 <Title order={1}>Все задания</Title>
                 <div className="container mx-auto">
@@ -196,25 +218,31 @@ const ListTasks = () => {
                                 value={searchQuery}
                                 onChange={onSearchQueryChange}
                             />
-                            <Select value={categoryFilter} onChange={onCategoryFilterChange} data={categoriesItems}/>
+                            <Select value={categoryFilter}
+                                    onChange={onCategoryFilterChange}
+                                    data={categoriesItems}/>
                         </Group>
                         <Group dir='row' className="filters" grow>
-                            <MultiSelect value={toysFilter} onChange={onToysFilterChange} data={toysItems}/>
-                            <MultiSelect value={tagsFilter} onChange={onTagsFilterChange} data={tagsItems}/>
+                            <MultiSelect value={toysFilter}
+                                         onChange={onToysFilterChange}
+                                         data={toysItems}/>
+                            <MultiSelect value={tagsFilter}
+                                         onChange={onTagsFilterChange}
+                                         data={tagsItems}/>
                         </Group>
                     </Stack>
                     <Space h="md"/>
                     <div className="overflow-x-auto bg-white rounded shadow">
-                        <SimpleGrid cols={3}>
-                            {tasksList ? tasksList.map((task: Task) => (
-                                <Flipped flipId={task.id} key={task.id}><TaskCard task={task}
-                                                                                  setFavorite={setFavorite}/></Flipped>
-                            )) : null}
-                            {tasksList.length === 0 && (
-                                <div>Ничего не найдено.</div>
-                            )}
-                        </SimpleGrid>
-
+                        {tasksFetching ? <Center mt={48}><Loader size={150}/></Center> :
+                            <SimpleGrid cols={3}>
+                                {tasksList ? tasksList.map((task: Task) => (
+                                    <TaskCard key={task.id} task={task} setFavorite={setFavorite}/>
+                                )) : null}
+                                {tasksList?.length === 0 && (
+                                    <div>Ничего не найдено.</div>
+                                )}
+                            </SimpleGrid>
+                        }
                     </div>
                 </div>
             </Container>
@@ -228,7 +256,7 @@ const ListTasks = () => {
                     Добавить задание
                 </Button>
             </Affix>
-        </Flipper>
+        </>
     );
 };
 export default ListTasks;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\TaskAPIController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 
+Route::patch('/tasks/favorite/{task}', [TaskAPIController::class, 'setTaskFavorite'])->name('tasks.setFavorite') ->middleware(['auth', 'verified']);
 
 Route::resource('tasks', App\Http\Controllers\API\TaskAPIController::class)
     ->except(['create', 'edit']);

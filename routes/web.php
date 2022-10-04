@@ -58,7 +58,6 @@ Route::get('/{any}', function () {
 //Route::get('/tasks/edit', [TaskController::class, 'edit'])->name('tasks.edit') ->middleware(['auth', 'verified']);
 //Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show') ->middleware(['auth', 'verified']);
 //Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.save') ->middleware(['auth', 'verified']);
-//Route::patch('/tasks/favorite/{task}', [TaskController::class, 'setTaskFavorite'])->name('tasks.setFavorite') ->middleware(['auth', 'verified']);
 
 //Route::resource('tasks', TaskController::class)->middleware(['auth', 'verified']);
 //Route::resource('toys', ToyController::class)->middleware(['auth', 'verified']);
