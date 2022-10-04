@@ -21,6 +21,7 @@ const sanctumConfig = {
 };
 root.render(
     <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
             <Sanctum config={sanctumConfig}>
                 <BrowserRouter>
                     <QueryParamProvider adapter={ReactRouter6Adapter}>
