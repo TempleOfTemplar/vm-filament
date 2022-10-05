@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios, {AxiosInstance} from "axios";
 
-export default function api() {
+export default function api(): AxiosInstance {
     const api = axios.create({
         withCredentials: true,
     });

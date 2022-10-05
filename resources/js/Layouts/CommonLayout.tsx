@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {ColorScheme, ColorSchemeProvider, MantineProvider} from "@mantine/core";
 import {Outlet} from 'react-router-dom';
 import {NotificationsProvider} from "@mantine/notifications";
-import {withSanctum} from "react-sanctum";
 import Navbar from "../Components/Navbar";
 
 

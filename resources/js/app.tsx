@@ -8,7 +8,6 @@ import FavoritedTasks from "./Pages/Task/FavoritedTasks";
 import ListMyTasks from "./Pages/Task/ListMyTasks";
 import ListTasks from "./Pages/Task/ListTasks";
 import ViewTask from "./Pages/Task/ViewTask";
-import EditTask from "./Pages/Task/EditTask";
 import CreateOrEditTask from "./Pages/Task/CreateOrEditTask";
 
 function App() {

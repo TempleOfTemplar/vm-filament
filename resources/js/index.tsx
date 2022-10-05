@@ -1,6 +1,6 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import App from './App';
+import App from './app';
 import {BrowserRouter} from "react-router-dom";
 import {Sanctum} from "react-sanctum";
 import {QueryParamProvider} from 'use-query-params';
@@ -11,7 +11,13 @@ import {store} from "@/store/store";
 
 const container = document.getElementById('app')!;
 const root = createRoot(container);
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false
+        }
+    }
+});
 const sanctumConfig = {
     apiUrl: "",
     csrfCookieRoute: "sanctum/csrf-cookie",

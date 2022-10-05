@@ -22,28 +22,89 @@ import {Tag} from "../../Models/Tag";
 import {Toy} from "../../Models/Toy";
 import {Category} from "../../Models/Category";
 import {ArrayParam, StringParam, useQueryParams} from "use-query-params";
-import {useSetTaskFavoriteMutation} from "@/store/reducers/TasksSlice";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {editTask, fetchTasks} from "@/services/TasksService";
+import {fetchTasks, setTaskFavorite} from "@/services/TasksService";
 import {fetchToys} from "@/services/ToysService";
 import {fetchTags} from "@/services/TagsService";
 import {fetchCategories} from "@/services/CategoriesService";
 
 //href={route("tasks.edit", id)}
 const ListTasks = () => {
-    const queryClient = useQueryClient()
     const [query, setQuery] = useQueryParams({
         search: StringParam,
         category: StringParam,
         toys: ArrayParam,
         tags: ArrayParam,
     });
-    const {mutate: editTaskMutation} = useMutation(editTask, {
-        onSuccess: (data, variables) => {
-            console.log()
-            queryClient.setQueryData(['task', {id: 5}], data)
-        }
-    })
+    const queryClient = useQueryClient()
+
+
+    const useUpdateIsFavorite = useMutation(
+        setTaskFavorite,
+        {
+            // When mutate is called:
+            onMutate: async (taskId: string) => {
+                await queryClient.cancelQueries(['tasks']);
+                const previousTasks = queryClient.getQueryData<Task[]>(['tasks']);
+                if (previousTasks) {
+                    const taskToUpdateIndex = previousTasks.findIndex(task => task.id.toString() === taskId);
+                    const tasksToUpdate = JSON.parse(JSON.stringify(previousTasks));
+                    tasksToUpdate[taskToUpdateIndex].has_favorited = !tasksToUpdate[taskToUpdateIndex].has_favorited;
+                    queryClient.setQueryData<Task[]>(['tasks'], [
+                        ...tasksToUpdate,
+                    ])
+                }
+                return previousTasks ? {previousTasks} : {previousTasks: []};
+            },
+            // If the mutation fails, use the context returned from onMutate to roll back
+            onError: (err, variables, context) => {
+                if (context) {
+                    queryClient.setQueryData<Task[]>(['tasks'], [...context.previousTasks])
+                }
+            },
+            // Always refetch after error or success:
+            onSettled: () => {
+                // queryClient.cancelQueries(['tasks'])
+                // queryClient.invalidateQueries(['todos'])
+            },
+        },
+    )
+
+    // const useUpdateIsFavorite = (id: string) => {
+    //     return useMutation(
+    //         () => api().patch(`/api/tasks/favorite/${id}`, {}),
+    //         {
+    //             // 💡 response of the mutation is passed to onSuccess
+    //             onSuccess: (updatedTask) => {
+    //                 // ✅ update detail view directly
+    //                 //queryClient.setQueryData(['tasks', id], updatedTask)
+    //             },
+    //             onMutate: async newTodo => {
+    //                 console.log("newTodo", newTodo);
+    //                 // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+    //                 await queryClient.cancelQueries(['tasks'])
+    //
+    //                 // Snapshot the previous value
+    //                 const previousTodos = queryClient.getQueryData(['tasks'])
+    //
+    //                 // Optimistically update to the new value
+    //                 queryClient.setQueryData(['tasks'], old => [...old, newTodo])
+    //
+    //                 // Return a context object with the snapshotted value
+    //                 return {previousTodos}
+    //             },
+    //         }
+    //     )
+    // }
+
+    // const {mutate: editTaskMutation, isLoading: isTaskEditing} = useMutation(async () => {
+    //     return await api().patch(`api/tasks/${putId}`, {});
+    // }, {
+    //     onSuccess: (data, variables) => {
+    //         console.log()
+    //         queryClient.setQueryData(['task', {id: 5}], data)
+    //     }
+    // })
 
     const {search, category, toys, tags} = query;
     const {
@@ -51,8 +112,8 @@ const ListTasks = () => {
         error: tasksError,
         data: tasksList,
         isFetching: tasksFetching
-    } = useQuery(["tasksList"], fetchTasks);
-    console.log("tasksList" ,tasksList);
+    } = useQuery(["tasks", query], fetchTasks);
+
     const {
         isLoading: toysLoading,
         error: toysError,
@@ -199,8 +260,11 @@ const ListTasks = () => {
         setCategoryFilter(selectedCategory)
     }
 
-    function setFavorite(task: Task) {
-        updateIsFavorite(task.id.toString());
+    const setFavorite = (task: Task) => {
+        // updateIsFavorite(task.id.toString());
+        if (task?.id) {
+            useUpdateIsFavorite.mutate(task.id.toString());
+        }
         // Inertia.patch(route('tasks.setFavorite', task.id), {to: true});
     }
 
@@ -233,7 +297,7 @@ const ListTasks = () => {
                     </Stack>
                     <Space h="md"/>
                     <div className="overflow-x-auto bg-white rounded shadow">
-                        {tasksFetching ? <Center mt={48}><Loader size={150}/></Center> :
+                        {tasksLoading ? <Center mt={48}><Loader size={150}/></Center> :
                             <SimpleGrid cols={3}>
                                 {tasksList ? tasksList.map((task: Task) => (
                                     <TaskCard key={task.id} task={task} setFavorite={setFavorite}/>
