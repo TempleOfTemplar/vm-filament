@@ -99,17 +99,18 @@ const useStyles = createStyles((theme) => ({
 
 interface NavbarProps {
     user: { name: string; avatar: string };
+    toggleColorScheme: () => void
 }
 
 // const links = [{link: route("tasks.index"), lavel: "Задания"}];
 
-const Navbar: FC<NavbarProps> = ({user}) => {
+const AppHeader: FC<NavbarProps> = ({user}) => {
     const {classes, theme, cx} = useStyles();
     const [opened, {toggle}] = useDisclosure(false);
     const [userMenuOpened, setUserMenuOpened] = useState(false);
 
     return (
-        <Header height={HEADER_HEIGHT} mb={24} className={classes.root}>
+        <Header height={HEADER_HEIGHT} mt={0} mb={0} px={16} className={classes.root}>
             <Container className={classes.header} my={0} px={0} py={0}>
                 <Group position="apart" my={0} className={classes.mainGroup}>
                     <ApplicationLogo className={classes.logo}/>
@@ -178,4 +179,4 @@ const Navbar: FC<NavbarProps> = ({user}) => {
     );
 };
 
-export default withSanctum(Navbar);
+export default withSanctum(AppHeader);

@@ -1,22 +1,33 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import {Button, Center, Container, Group, Input, Loader, MultiSelect, Select, Textarea, TextInput} from "@mantine/core";
 import {Tag} from "../../Models/Tag";
 import {Toy} from "../../Models/Toy";
 import {Category} from "../../Models/Category";
 import {useForm} from "@mantine/form";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {fetchToys} from "@/services/ToysService";
 import {fetchTags} from "@/services/TagsService";
 import {fetchCategories} from "@/services/CategoriesService";
 import {createTask, editTask, getTaskById} from "@/services/TasksService";
 import {Flipped, spring} from "react-flip-toolkit";
-import {OutputData} from "@editorjs/editorjs";
-import MDEditor from '@uiw/react-md-editor';
 import {Task} from "@/Models/Task";
+import {useTheme} from "@emotion/react";
+import MarkdownIt from 'markdown-it';
+import MdEditor from 'react-markdown-editor-lite';
+import api from "@/utils/Api";
 
 // const ReactEditorJS = createReactEditorJS()
-
+const plugins = [
+    "fonts",
+    "my-plugins",
+    "link",
+    "clear",
+    "image",
+    "logger",
+    "mode-toggle",
+    "full-screen",
+];
 const onAppear = (el: any, i: any) => {
     spring({
         config: {overshootClamping: true},
@@ -35,6 +46,9 @@ const onAppear = (el: any, i: any) => {
 };
 const CreateOrEditTask = () => {
         let {taskId} = useParams();
+        const navigation = useNavigate();
+        const theme: any = useTheme();
+
         const editMode = useMemo(() => {
             return !(taskId === undefined);
         }, [taskId]);
@@ -72,22 +86,21 @@ const CreateOrEditTask = () => {
             },
         });
 
-        const [editorValue, setEditorValue] = useState('')
         const {
             isLoading: toysLoading,
             error: toysError,
             data: toysList,
-        } = useQuery(["toysList"], fetchToys);
+        } = useQuery(["toys"], fetchToys);
         const {
             isLoading: tagsLoading,
             error: tagsError,
             data: tagsList,
-        } = useQuery(["tagsList"], fetchTags);
+        } = useQuery(["tags"], fetchTags);
         const {
             isLoading: categoriesLoading,
             error: categoriesError,
             data: categoriesList,
-        } = useQuery(["categoriesList"], fetchCategories);
+        } = useQuery(["categories"], fetchCategories);
 
         const toysItems = useMemo(() => {
             return toysList ? toysList.map((toy: Toy) => {
@@ -103,52 +116,21 @@ const CreateOrEditTask = () => {
 
         const categoriesItems = useMemo(() => {
             return categoriesList ? categoriesList.map((category: Category) => {
-                return {value: category.id, label: category.title}
+                return {value: category.id.toString(), label: category.title}
             }) : [];
         }, [categoriesList]);
 
         const useUpdateTask = useMutation(
             editTask,
             {
-                // When mutate is called:
-                // onMutate: async (task: Task) => {
-                //     await queryClient.cancelQueries(['tasks']);
-                //     const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
-                //     if (previousTasks) {
-                //         const taskToUpdateIndex = previousTasks.findIndex(task => task.id.toString() === taskId);
-                //         const tasksToUpdate = JSON.parse(JSON.stringify(previousTasks));
-                //         tasksToUpdate[taskToUpdateIndex].has_favorited = !tasksToUpdate[taskToUpdateIndex].has_favorited;
-                //         queryClient.setQueryData<Task[]>(["tasks", query], [
-                //             ...tasksToUpdate,
-                //         ])
-                //     }
-                //     return previousTasks ? {previousTasks} : {previousTasks: []};
-                // },
-                // // If the mutation fails, use the context returned from onMutate to roll back
-                // onError: (err, variables, context) => {
-                //     if (context) {
-                //         queryClient.setQueryData<Task[]>(['tasks'], [...context.previousTasks])
-                //     }
-                // },
-                // // Always refetch after error or success:
-                // onSettled: () => {
-                //     // queryClient.cancelQueries(['tasks'])
-                //     // queryClient.invalidateQueries(['todos'])
-                // },
-            },
-        );
-
-        const useCreateTask = useMutation(
-            createTask,
-            {
-                // When mutate is called:
-                onMutate: async (task: Task) => {
+                onMutate: async (taskToUpdate: Task) => {
                     await queryClient.cancelQueries(['tasks']);
                     const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
                     if (previousTasks) {
-                        const taskToUpdateIndex = previousTasks.findIndex(task => task.id.toString() === taskId);
+                        const taskToUpdateIndex = previousTasks.findIndex(task => task.id === taskToUpdate.id);
                         const tasksToUpdate = JSON.parse(JSON.stringify(previousTasks));
-                        tasksToUpdate[taskToUpdateIndex].has_favorited = !tasksToUpdate[taskToUpdateIndex].has_favorited;
+                        Object.assign(tasksToUpdate[taskToUpdateIndex], taskToUpdate);
+                        console.log("tasksToUpdate[taskToUpdateIndex]", tasksToUpdate[taskToUpdateIndex]);
                         queryClient.setQueryData<Task[]>(["tasks"], [
                             ...tasksToUpdate,
                         ])
@@ -162,7 +144,54 @@ const CreateOrEditTask = () => {
                     }
                 },
                 // Always refetch after error or success:
-                onSettled: () => {
+                onSuccess: () => {
+                    navigation(-1);
+                    // queryClient.cancelQueries(['tasks'])
+                    // queryClient.invalidateQueries(['todos'])
+                },
+            },
+        );
+
+        const useCreateTask = useMutation(
+            createTask,
+            {
+                // When mutate is called:
+                // onMutate: async (taskToUpdate: Task) => {
+                //     await queryClient.cancelQueries(['tasks']);
+                //     const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+                //     if (previousTasks) {
+                //         const taskToUpdateIndex = previousTasks.findIndex(task => task.id.toString() === taskToUpdate.id.toString());
+                //         const tasksToUpdate = JSON.parse(JSON.stringify(previousTasks));
+                //         // tasksToUpdate[taskToUpdateIndex].has_favorited = !tasksToUpdate[taskToUpdateIndex].has_favorited;
+                //         Object.assign(tasksToUpdate[taskToUpdateIndex], taskToUpdate);
+                //         // console.log("tasksToUpdate[taskToUpdateIndex]", tasksToUpdate[taskToUpdateIndex]);
+                //         queryClient.setQueryData<Task[]>(["tasks"], [
+                //             ...tasksToUpdate,
+                //         ])
+                //     }
+                //     return previousTasks ? {previousTasks} : {previousTasks: []};
+                // },
+                // // If the mutation fails, use the context returned from onMutate to roll back
+                // onError: (err, variables, context) => {
+                //     if (context) {
+                //         queryClient.setQueryData<Task[]>(['tasks'], [...context.previousTasks])
+                //     }
+                // },
+                // Always refetch after error or success:
+                onSuccess: (data) => {
+                    console.log("data", data);
+                    //const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+                    //const taskToUpdateIndex = previousTasks.findIndex(task => task.id.toString() === taskToUpdate.id.toString());
+                    // console.log(queryClient.getQueryCache().getAll());
+                    const queryFromListPage = queryClient.getQueryCache().getAll().filter(query => {
+                        return query.queryKey[0] === "task";
+                    });
+                    if (queryFromListPage?.length) {
+                        queryFromListPage.forEach(queryFromListPageItem => {
+                            queryFromListPageItem.invalidate();
+                        })
+                    }
+                    navigation('/tasks/my');
                     // queryClient.cancelQueries(['tasks'])
                     // queryClient.invalidateQueries(['todos'])
                 },
@@ -171,23 +200,11 @@ const CreateOrEditTask = () => {
 
         function handleSubmit(e: any) {
             e.preventDefault();
-            console.log(e);
-            console.log("form", form.values);
             if (editMode) {
                 useUpdateTask.mutate(form.values as any);
             } else {
-
+                useCreateTask.mutate(form.values as any);
             }
-        }
-
-        function onEditorValueChanged(value: any) {
-            form.setFieldValue('content', value);
-        }
-
-        async function handleSave(data: OutputData) {
-            console.log("data", data);
-            // const savedData = await editorCore.current.save();
-            // form.setFieldValue('content', data);
         }
 
         // const handleImageUpload = useCallback(
@@ -206,6 +223,26 @@ const CreateOrEditTask = () => {
         //         }),
         //     []
         // );
+        const mdParser = new MarkdownIt(/* Markdown-it options */);
+
+        function handleEditorChange({html, text}: any) {
+            form.setFieldValue('content', text);
+        }
+
+        const handleImageUpload = async (file: any) => {
+            console.log('handleImageUpload', file);
+            const formData = new FormData();
+            // var imagefile = document.querySelector('#file');
+            formData.append("image", file);
+            return api().post('/api/tasks/attachImage', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then((data) => {
+                console.log(data.data);
+                return data.data.url;
+            });
+        };
 
         return (
             <Flipped flipId={`task-card-${taskId}`} onAppear={onAppear}>
@@ -216,7 +253,6 @@ const CreateOrEditTask = () => {
                                        label="Заголовок"
                                        withAsterisk
                                        {...form.getInputProps('title')}/>
-                            {/*{errors.title}*/}
                             <Textarea
                                 name="excerpt"
                                 placeholder=""
@@ -224,49 +260,35 @@ const CreateOrEditTask = () => {
                                 withAsterisk
                                 {...form.getInputProps('excerpt')}
                             />
-                            {/*{errors.excerpt}*/}
                             <MultiSelect name="toys"
                                          label={"Инвентарь"}
                                          data={toysItems}
                                          {...form.getInputProps('toys')}
-                                // value={selectedToys}
-                                // onChange={handleToysChange}
                             />
-                            {/*{errors.toys}*/}
                             <MultiSelect name="tags"
                                          label={"Теги"}
                                          data={tagsItems}
                                          {...form.getInputProps('tags')}
-                                // value={selectedTags}
-                                // onChange={handleTagsChange}
                             />
-                            {/*{errors.tags}*/}
-                            <Select name="category"
+                            <Select name="category_id"
                                     label={"Категория"}
                                     data={categoriesItems}
                                     {...form.getInputProps('category_id')}
-                                // value={selectedCategory}
-                                // onChange={handleCategoryChange}
                             />
-                            {/*{errors.category}*/}
-                            {/*{JSON.stringify(form.values?.content)}*/}
-                            <Input.Wrapper label="Текст задания">
-                                {/*{form.values?.content ? <ReactEditorJS*/}
+                            <Input.Wrapper label="Текст задания" data-color-mode={theme.colorScheme}>
+                                {/*<MDEditor*/}
                                 {/*    value={form.values.content}*/}
-                                {/*    onInitialize={handleInitialize}*/}
-                                {/*    tools={EDITOR_JS_TOOLS}*/}
-                                {/*    onChange={handleSave}/> : null}*/}
-
-                                {/*{form.values?.content ? <Editor*/}
-                                {/*    data={form.values.content}*/}
-                                {/*    onChange={handleSave}/> : null}*/}
-                                <MDEditor
-                                    value={form.values.content}
-                                    onChange={onEditorValueChanged}
-                                />
-                                {/*<RichTextEditor ref={editorRef} value={editorValue} onChange={setEditorValue} id="rte"/>*/}
+                                {/*    onChange={onEditorValueChanged}*/}
+                                {/*    previewOptions={{*/}
+                                {/*        rehypePlugins: [[rehypeSanitize]],*/}
+                                {/*    }}*/}
+                                {/*/>*/}
+                                <MdEditor style={{height: '500px'}}
+                                          value={form.values.content}
+                                          renderHTML={text => mdParser.render(text)}
+                                          onImageUpload={handleImageUpload}
+                                          onChange={handleEditorChange}/>
                             </Input.Wrapper>
-                            {/*{errors.content}*/}
                             <Group position="right" mt="md">
                                 <Button type={"submit"}>{editMode ? 'Сохранить' : 'Отправить на модерацию'}</Button>
                             </Group>

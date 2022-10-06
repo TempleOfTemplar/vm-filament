@@ -21,12 +21,14 @@ import {Task} from "../../Models/Task";
 import {Tag} from "../../Models/Tag";
 import {Toy} from "../../Models/Toy";
 import {Category} from "../../Models/Category";
-import {ArrayParam, StringParam, useQueryParams} from "use-query-params";
+import {ArrayParam, StringParam, useQueryParams, withDefault} from "use-query-params";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {fetchTasks, setTaskFavorite} from "@/services/TasksService";
 import {fetchToys} from "@/services/ToysService";
 import {fetchTags} from "@/services/TagsService";
 import {fetchCategories} from "@/services/CategoriesService";
+import {useSearchParams} from "react-router-dom";
+import {useUpdateIsFavorite} from "@/queries/useSetTaskFavorite";
 
 
 //href={route("tasks.edit", id)}
@@ -36,10 +38,11 @@ const ListTasks = () => {
         category: StringParam,
         toys: ArrayParam,
         tags: ArrayParam,
-    });
-    const queryClient = useQueryClient();
-    const [firstTasksLoaded, setFirstTasksLoaded] = useState<boolean>(false);
+    }, {});
+    const updateIsFavorite = useUpdateIsFavorite(query);
 
+
+    const [firstTasksLoaded, setFirstTasksLoaded] = useState<boolean>(false);
 
     const {search, category, toys, tags} = query;
     const {
@@ -61,17 +64,17 @@ const ListTasks = () => {
         isLoading: toysLoading,
         error: toysError,
         data: toysList,
-    } = useQuery(["toysList"], fetchToys);
+    } = useQuery(["toys"], fetchToys);
     const {
         isLoading: tagsLoading,
         error: tagsError,
         data: tagsList,
-    } = useQuery(["tagsList"], fetchTags);
+    } = useQuery(["tags"], fetchTags);
     const {
         isLoading: categoriesLoading,
         error: categoriesError,
         data: categoriesList,
-    } = useQuery(["categoriesList"], fetchCategories);
+    } = useQuery(["categories"], fetchCategories);
 
     // из queryParams в контролы
     useEffect(() => {
@@ -146,39 +149,10 @@ const ListTasks = () => {
         setCategoryFilter(selectedCategory)
     }
 
-    const useUpdateIsFavorite = useMutation(
-        setTaskFavorite,
-        {
-            // When mutate is called:
-            onMutate: async (taskId: string) => {
-                await queryClient.cancelQueries(['tasks']);
-                const previousTasks = queryClient.getQueryData<Task[]>(["tasks", query]);
-                if (previousTasks) {
-                    const taskToUpdateIndex = previousTasks.findIndex(task => task.id.toString() === taskId);
-                    const tasksToUpdate = JSON.parse(JSON.stringify(previousTasks));
-                    tasksToUpdate[taskToUpdateIndex].has_favorited = !tasksToUpdate[taskToUpdateIndex].has_favorited;
-                    queryClient.setQueryData<Task[]>(["tasks", query], [
-                        ...tasksToUpdate,
-                    ])
-                }
-                return previousTasks ? {previousTasks} : {previousTasks: []};
-            },
-            // If the mutation fails, use the context returned from onMutate to roll back
-            onError: (err, variables, context) => {
-                if (context) {
-                    queryClient.setQueryData<Task[]>(['tasks'], [...context.previousTasks])
-                }
-            },
-            // Always refetch after error or success:
-            onSettled: () => {
-                // queryClient.cancelQueries(['tasks'])
-                // queryClient.invalidateQueries(['todos'])
-            },
-        },
-    )
+
     const setFavorite = (task: Task) => {
         if (task?.id) {
-            useUpdateIsFavorite.mutate(task.id.toString());
+            updateIsFavorite.mutate(task.id.toString());
         }
     }
     return (
@@ -187,8 +161,8 @@ const ListTasks = () => {
                 <Title order={1}>Все задания</Title>
                 <div className="container mx-auto">
                     <Stack>
-                        <Group dir='row' className="filters" grow>
-                            <TextInput
+                        <Group dir='row' className="filters" grow >
+                            <TextInput width={'100%'}
                                 icon={<IconSearch size={18} stroke={1.5}/>}
                                 placeholder="Поиск по названию или описанию"
                                 rightSectionWidth={42}
@@ -211,7 +185,11 @@ const ListTasks = () => {
                     <Space h="md"/>
                     <div className="overflow-x-auto bg-white rounded shadow">
                         {!firstTasksLoaded && tasksLoading ? <Center mt={48}><Loader size={150}/></Center> :
-                            <SimpleGrid cols={3}>
+                            <SimpleGrid breakpoints={[
+                                {minWidth: 480, cols: 1, spacing: 'sm'},
+                                {minWidth: 768, cols: 2, spacing: 'sm'},
+                                {minWidth: 1024, cols: 3, spacing: 'sm'},
+                            ]}>
                                 {tasksList?.length ? tasksList.map((task: Task) => (
                                     <TaskCard key={task.id} task={task} setFavorite={setFavorite}/>
                                 )) : <div>Ничего не найдено.</div>}

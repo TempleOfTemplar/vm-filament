@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\TaskAPIController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,11 +16,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
+Route::post('/tasks/attachImage', [TaskAPIController::class, 'attachImage'])->name('tasks.attachImage') ->middleware(['auth', 'verified']);
 Route::patch('/tasks/favorite/{task}', [TaskAPIController::class, 'setTaskFavorite'])->name('tasks.setFavorite') ->middleware(['auth', 'verified']);
-
-Route::resource('tasks', App\Http\Controllers\API\TaskAPIController::class)
-    ->except(['create', 'edit']);
+Route::get('/tasks/my', [TaskAPIController::class, 'myTasks'])->name('tasks.my') ->middleware(['auth', 'verified']);
+Route::resource('tasks', App\Http\Controllers\API\TaskAPIController::class);
 
 Route::resource('toys', App\Http\Controllers\API\ToyAPIController::class)
     ->except(['create', 'edit']);

@@ -2,12 +2,25 @@
 
 namespace App\Models;
 
-use FilamentCurator\Models\Media;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Spatie\Image\Manipulations;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Toy extends Model
+class Toy extends Model implements HasMedia
 {
+
+    use InteractsWithMedia;
+
+//    public function registerMediaConversions(Media $media = null): void
+//    {
+//        $this
+//            ->addMediaConversion('thumbnail')
+//            ->fit(Manipulations::FIT_CROP, 300, 300)
+//            ->nonQueued();
+//    }
+
     public $table = 'toys';
 
     public $fillable = [
@@ -38,10 +51,20 @@ class Toy extends Model
         return $this->belongsToMany(\App\Models\Task::class, 'task_toy');
     }
 
-    protected $with = ['image'];
-
-    public function image(): HasOne
+    public function registerMediaCollections(): void
     {
-        return $this->hasOne(Media::class, 'id', 'image');
+        $this
+            ->addMediaCollection('toys')
+            ->singleFile();
+
+        $this
+            ->addMediaCollection('tasks_images');
     }
+
+//    protected $with = ['image'];
+//
+//    public function image(): HasOne
+//    {
+//        return $this->hasOne(Media::class, 'id', 'image');
+//    }
 }

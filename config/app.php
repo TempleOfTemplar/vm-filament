@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\LaravelMediaServiceProvider;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -194,6 +195,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        LaravelMediaServiceProvider::class,
         L5Swagger\L5SwaggerServiceProvider::class,
     ],
 

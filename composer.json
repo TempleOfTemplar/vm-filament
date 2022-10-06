@@ -7,7 +7,6 @@
     "require": {
         "php": "^8.0.2",
         "authanram/laravel-quill": "dev-master",
-        "awcodes/filament-curator": "^0.5.0",
         "based/laravel-typescript": "^0.0.3",
         "bezhansalleh/filament-shield": "^2.2",
         "darkaonline/l5-swagger": "^8.4",
@@ -33,10 +32,12 @@
         "rawilk/laravel-form-components": "^7.1",
         "socialiteproviders/google": "^4.1",
         "socialiteproviders/vkontakte": "^5.0",
+        "spatie/laravel-medialibrary": "^9.0.0 | ^10.0.0",
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-typescript-transformer": "^2.1",
         "templeoftemplar/filament-quill": "dev-master",
-        "tightenco/ziggy": "^1.0"
+        "tightenco/ziggy": "^1.0",
+        "tjmpromos/sortable-gallery": "dev-main"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -81,6 +82,12 @@
             "dont-discover": []
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/mindz-team/laravel-media"
+        }
+    ],
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",

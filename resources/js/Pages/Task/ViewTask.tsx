@@ -133,7 +133,6 @@ const ViewTask: FC<any> = () => {
                             <Divider my="xs" label="Текст задания" labelPosition="center"/>
                             <TypographyStylesProvider>
                                 <MDEditor.Markdown source={task?.content} style={{ whiteSpace: 'pre-wrap' }} />
-                                {/*<div dangerouslySetInnerHTML={{__html: html}}></div>*/}
                             </TypographyStylesProvider>
                         </Paper>}
                 </Container>

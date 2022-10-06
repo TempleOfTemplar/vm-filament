@@ -7,6 +7,11 @@ export async function fetchTasks(filterData: any): Promise<Task[]> {
     return res.data;
 }
 
+export async function fetchMyTasks(): Promise<Task[]> {
+    const res = await api().get('/api/tasks/my')
+    return res.data;
+}
+
 export async function getTaskById(id: string | undefined): Promise<Task> {
     const res = await api().get(`/api/tasks/${id}`)
     return res.data;
