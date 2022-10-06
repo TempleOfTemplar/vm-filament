@@ -1,38 +1,57 @@
-import React, {useEffect, useMemo} from 'react';
-import {createReactEditorJS} from "react-editor-js";
+import React, {useEffect, useMemo, useState} from 'react';
 import {Button, Center, Container, Group, Input, Loader, MultiSelect, Select, Textarea, TextInput} from "@mantine/core";
-import {EDITOR_JS_TOOLS} from "../../utils/EditorJsToolbar";
 import {Tag} from "../../Models/Tag";
 import {Toy} from "../../Models/Toy";
 import {Category} from "../../Models/Category";
 import {useForm} from "@mantine/form";
 import {useParams} from "react-router-dom";
-import {useQuery} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {fetchToys} from "@/services/ToysService";
 import {fetchTags} from "@/services/TagsService";
 import {fetchCategories} from "@/services/CategoriesService";
-import {getTaskById} from "@/services/TasksService";
+import {createTask, editTask, getTaskById} from "@/services/TasksService";
+import {Flipped, spring} from "react-flip-toolkit";
+import {OutputData} from "@editorjs/editorjs";
+import MDEditor from '@uiw/react-md-editor';
+import {Task} from "@/Models/Task";
 
-const ReactEditorJS = createReactEditorJS()
+// const ReactEditorJS = createReactEditorJS()
 
-
+const onAppear = (el: any, i: any) => {
+    spring({
+        config: {overshootClamping: true},
+        values: {
+            scale: [0.25, 1],
+            opacity: [1, 1]
+        },
+        onUpdate: ({opacity, scale}) => {
+            el.style.opacity = opacity;
+            el.style.transform = `scale(${scale})`;
+        },
+        onComplete: () => {
+            // add callback logic here if necessary
+        }
+    });
+};
 const CreateOrEditTask = () => {
         let {taskId} = useParams();
         const editMode = useMemo(() => {
             return !(taskId === undefined);
         }, [taskId]);
-        const {data: task, isLoading: taskLoading} = useQuery(["posts", taskId], () => getTaskById(taskId), {
+        const {data: task, isLoading: taskLoading} = useQuery(["tasks", taskId], () => getTaskById(taskId), {
             enabled: editMode
         });
+        const queryClient = useQueryClient();
         useEffect(() => {
             if (task) {
                 form.setValues({
+                    id: task.id,
                     title: task.title,
                     excerpt: task.excerpt,
-                    category: task.category_id.toString(),
+                    category_id: task.category_id.toString(),
                     tags: task.tags ? task.tags.map((tag: Tag) => tag.id) : [],
                     toys: task.toys ? task.toys.map((toy: Toy) => toy.id) : [],
-                    content: JSON.parse(task.content)
+                    content: task.content
                 });
             }
         }, [task]);
@@ -44,8 +63,8 @@ const CreateOrEditTask = () => {
                 excerpt: '',
                 toys: [],
                 tags: [],
-                category: '',
-                content: null
+                category_id: '',
+                content: ''
             },
 
             validate: {
@@ -53,8 +72,7 @@ const CreateOrEditTask = () => {
             },
         });
 
-        const editorCore = React.useRef(null);
-
+        const [editorValue, setEditorValue] = useState('')
         const {
             isLoading: toysLoading,
             error: toysError,
@@ -89,81 +107,173 @@ const CreateOrEditTask = () => {
             }) : [];
         }, [categoriesList]);
 
+        const useUpdateTask = useMutation(
+            editTask,
+            {
+                // When mutate is called:
+                // onMutate: async (task: Task) => {
+                //     await queryClient.cancelQueries(['tasks']);
+                //     const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+                //     if (previousTasks) {
+                //         const taskToUpdateIndex = previousTasks.findIndex(task => task.id.toString() === taskId);
+                //         const tasksToUpdate = JSON.parse(JSON.stringify(previousTasks));
+                //         tasksToUpdate[taskToUpdateIndex].has_favorited = !tasksToUpdate[taskToUpdateIndex].has_favorited;
+                //         queryClient.setQueryData<Task[]>(["tasks", query], [
+                //             ...tasksToUpdate,
+                //         ])
+                //     }
+                //     return previousTasks ? {previousTasks} : {previousTasks: []};
+                // },
+                // // If the mutation fails, use the context returned from onMutate to roll back
+                // onError: (err, variables, context) => {
+                //     if (context) {
+                //         queryClient.setQueryData<Task[]>(['tasks'], [...context.previousTasks])
+                //     }
+                // },
+                // // Always refetch after error or success:
+                // onSettled: () => {
+                //     // queryClient.cancelQueries(['tasks'])
+                //     // queryClient.invalidateQueries(['todos'])
+                // },
+            },
+        );
+
+        const useCreateTask = useMutation(
+            createTask,
+            {
+                // When mutate is called:
+                onMutate: async (task: Task) => {
+                    await queryClient.cancelQueries(['tasks']);
+                    const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+                    if (previousTasks) {
+                        const taskToUpdateIndex = previousTasks.findIndex(task => task.id.toString() === taskId);
+                        const tasksToUpdate = JSON.parse(JSON.stringify(previousTasks));
+                        tasksToUpdate[taskToUpdateIndex].has_favorited = !tasksToUpdate[taskToUpdateIndex].has_favorited;
+                        queryClient.setQueryData<Task[]>(["tasks"], [
+                            ...tasksToUpdate,
+                        ])
+                    }
+                    return previousTasks ? {previousTasks} : {previousTasks: []};
+                },
+                // If the mutation fails, use the context returned from onMutate to roll back
+                onError: (err, variables, context) => {
+                    if (context) {
+                        queryClient.setQueryData<Task[]>(['tasks'], [...context.previousTasks])
+                    }
+                },
+                // Always refetch after error or success:
+                onSettled: () => {
+                    // queryClient.cancelQueries(['tasks'])
+                    // queryClient.invalidateQueries(['todos'])
+                },
+            },
+        )
 
         function handleSubmit(e: any) {
             e.preventDefault();
+            console.log(e);
             console.log("form", form.values);
             if (editMode) {
-
+                useUpdateTask.mutate(form.values as any);
             } else {
 
             }
         }
 
-        function handleInitialize(instance: any) {
-            editorCore.current = instance
+        function onEditorValueChanged(value: any) {
+            form.setFieldValue('content', value);
         }
 
-        async function handleSave() {
-            const savedData = await editorCore.current.save();
-            form.setFieldValue('content', savedData);
+        async function handleSave(data: OutputData) {
+            console.log("data", data);
+            // const savedData = await editorCore.current.save();
+            // form.setFieldValue('content', data);
         }
+
+        // const handleImageUpload = useCallback(
+        //     (file: File): Promise<string> =>
+        //         new Promise((resolve, reject) => {
+        //             const formData = new FormData();
+        //             formData.append('image', file);
+        //
+        //             fetch('https://api.imgbb.com/1/upload?key=api_key', {
+        //                 method: 'POST',
+        //                 body: formData,
+        //             })
+        //                 .then((response) => response.json())
+        //                 .then((result) => resolve(result.data.url))
+        //                 .catch(() => reject(new Error('Upload failed')));
+        //         }),
+        //     []
+        // );
 
         return (
-            <Container>
-                {editMode && taskLoading ? <Center mt={48}><Loader size={150}/></Center> :
-                    <form name="createForm" onSubmit={handleSubmit}>
-                        <TextInput name="title"
-                                   label="Заголовок"
-                                   withAsterisk
-                                   {...form.getInputProps('title')}/>
-                        {/*{errors.title}*/}
-                        <Textarea
-                            name="excerpt"
-                            placeholder=""
-                            label="Краткое описание"
-                            withAsterisk
-                            {...form.getInputProps('excerpt')}
-                        />
-                        {/*{errors.excerpt}*/}
-                        <MultiSelect name="toys"
-                                     label={"Инвентарь"}
-                                     data={toysItems}
-                                     {...form.getInputProps('toys')}
-                            // value={selectedToys}
-                            // onChange={handleToysChange}
-                        />
-                        {/*{errors.toys}*/}
-                        <MultiSelect name="tags"
-                                     label={"Теги"}
-                                     data={tagsItems}
-                                     {...form.getInputProps('tags')}
-                            // value={selectedTags}
-                            // onChange={handleTagsChange}
-                        />
-                        {/*{errors.tags}*/}
-                        <Select name="category"
-                                label={"Категория"}
-                                data={categoriesItems}
-                                {...form.getInputProps('category')}
-                            // value={selectedCategory}
-                            // onChange={handleCategoryChange}
-                        />
-                        {/*{errors.category}*/}
-                        <Input.Wrapper label="Текст задания">
-                            <ReactEditorJS
-                                value={form.values.content}
-                                onInitialize={handleInitialize}
-                                tools={EDITOR_JS_TOOLS}
-                                onChange={handleSave}/>
-                        </Input.Wrapper>
-                        {/*{errors.content}*/}
-                        <Group position="right" mt="md">
-                            <Button type={"submit"}>{editMode ? 'Сохранить' : 'Отправить на модерацию'}</Button>
-                        </Group>
-                    </form>
-                }
-            </Container>
+            <Flipped flipId={`task-card-${taskId}`} onAppear={onAppear}>
+                <Container>
+                    {editMode && taskLoading ? <Center mt={48}><Loader size={150}/></Center> :
+                        <form name="createForm" onSubmit={handleSubmit}>
+                            <TextInput name="title"
+                                       label="Заголовок"
+                                       withAsterisk
+                                       {...form.getInputProps('title')}/>
+                            {/*{errors.title}*/}
+                            <Textarea
+                                name="excerpt"
+                                placeholder=""
+                                label="Краткое описание"
+                                withAsterisk
+                                {...form.getInputProps('excerpt')}
+                            />
+                            {/*{errors.excerpt}*/}
+                            <MultiSelect name="toys"
+                                         label={"Инвентарь"}
+                                         data={toysItems}
+                                         {...form.getInputProps('toys')}
+                                // value={selectedToys}
+                                // onChange={handleToysChange}
+                            />
+                            {/*{errors.toys}*/}
+                            <MultiSelect name="tags"
+                                         label={"Теги"}
+                                         data={tagsItems}
+                                         {...form.getInputProps('tags')}
+                                // value={selectedTags}
+                                // onChange={handleTagsChange}
+                            />
+                            {/*{errors.tags}*/}
+                            <Select name="category"
+                                    label={"Категория"}
+                                    data={categoriesItems}
+                                    {...form.getInputProps('category_id')}
+                                // value={selectedCategory}
+                                // onChange={handleCategoryChange}
+                            />
+                            {/*{errors.category}*/}
+                            {/*{JSON.stringify(form.values?.content)}*/}
+                            <Input.Wrapper label="Текст задания">
+                                {/*{form.values?.content ? <ReactEditorJS*/}
+                                {/*    value={form.values.content}*/}
+                                {/*    onInitialize={handleInitialize}*/}
+                                {/*    tools={EDITOR_JS_TOOLS}*/}
+                                {/*    onChange={handleSave}/> : null}*/}
+
+                                {/*{form.values?.content ? <Editor*/}
+                                {/*    data={form.values.content}*/}
+                                {/*    onChange={handleSave}/> : null}*/}
+                                <MDEditor
+                                    value={form.values.content}
+                                    onChange={onEditorValueChanged}
+                                />
+                                {/*<RichTextEditor ref={editorRef} value={editorValue} onChange={setEditorValue} id="rte"/>*/}
+                            </Input.Wrapper>
+                            {/*{errors.content}*/}
+                            <Group position="right" mt="md">
+                                <Button type={"submit"}>{editMode ? 'Сохранить' : 'Отправить на модерацию'}</Button>
+                            </Group>
+                        </form>
+                    }
+                </Container>
+            </Flipped>
         );
     }
 ;

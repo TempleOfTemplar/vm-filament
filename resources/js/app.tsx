@@ -1,5 +1,5 @@
 import React from 'react';
-import {Navigate, Route, Routes} from 'react-router-dom';
+import {Navigate, Route, Routes, useNavigate} from 'react-router-dom';
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/auth/Login";
 import Register from "./Pages/Auth/Register";
@@ -9,6 +9,9 @@ import ListMyTasks from "./Pages/Task/ListMyTasks";
 import ListTasks from "./Pages/Task/ListTasks";
 import ViewTask from "./Pages/Task/ViewTask";
 import CreateOrEditTask from "./Pages/Task/CreateOrEditTask";
+import ViewTaskModal from "@/Pages/Task/ViewTaskModal";
+import CreateOfEditTaskModal from "@/Pages/Task/CreateOfEditTaskModal";
+
 
 function App() {
     //Getting isAuthenticated store value from Authentication reducer.
@@ -28,6 +31,9 @@ function App() {
     // if (validateUserLoader) {
     //     return <Spinner/>;
     // }
+
+    const navigate = useNavigate();
+
     return <Routes>
         <Route path="/" element={<CommonLayout/>}>
             <Route index element={<Dashboard/>}/>
@@ -36,8 +42,8 @@ function App() {
             <Route path="tasks">
                 <Route path='' element={<ListTasks/>}/>
                 <Route path='add' element={<CreateOrEditTask/>}/>
-                <Route path=':taskId' element={<ViewTask/>}/>
-                <Route path='edit/:taskId' element={<CreateOrEditTask/>}/>
+                <Route path=':taskId' element={<ViewTaskModal onClose={() => navigate('/tasks')}/>}/>
+                <Route path='edit/:taskId' element={<CreateOfEditTaskModal onClose={() => navigate('/tasks')}/>}/>
                 <Route path='favorite' element={<FavoritedTasks/>}/>
                 <Route path='my' element={<ListMyTasks/>}/>
             </Route>

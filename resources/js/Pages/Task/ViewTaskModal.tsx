@@ -1,4 +1,4 @@
-import React, {FC, useMemo} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {
     Avatar,
     Badge,
@@ -9,25 +9,25 @@ import {
     Group,
     Image,
     Loader,
+    Modal,
     Paper,
     Text,
     Title,
     TypographyStylesProvider
-} from "@mantine/core";
-import edjsHTML from 'editorjs-html';
-import {Carousel} from "@mantine/carousel";
-import {useParams} from 'react-router-dom';
-import {Tag} from "@/Models/Tag";
-import {Toy} from "@/Models/Toy";
+} from '@mantine/core';
 import {Flipped, spring} from "react-flip-toolkit";
+import {Tag} from "@/Models/Tag";
+import {Carousel} from "@mantine/carousel";
+import {Toy} from "@/Models/Toy";
+import MDEditor from "@uiw/react-md-editor";
 import {useQuery} from "@tanstack/react-query";
 import {getTaskById} from "@/services/TasksService";
-import MDEditor from '@uiw/react-md-editor';
-
-const edjsParser = edjsHTML();
+import {useParams} from "react-router-dom";
 
 const useStyles = createStyles((theme) => ({}));
-
+type ViewTaskModalProps = {
+    onClose: () => void
+}
 const onAppear = (el: any, i: any) => {
     spring({
         config: {overshootClamping: true},
@@ -44,29 +44,35 @@ const onAppear = (el: any, i: any) => {
         }
     });
 }
+const ViewTaskModal: FC<ViewTaskModalProps> = ({onClose}) => {
+    let {taskId} = useParams<string>();
 
-const ViewTask: FC<any> = () => {
-        let {taskId} = useParams<string>();
+    const {data: task, isLoading: taskLoading} = useQuery(["tasks", taskId], () => getTaskById(taskId));
+    const {classes, theme} = useStyles();
+    const [opened, setOpened] = useState(false);
+    useEffect(() => {
+        setOpened(true);
+    }, [])
 
-        const {data: task, isLoading: taskLoading} = useQuery(["tasks", taskId], () => getTaskById(taskId));
-        const {classes, theme} = useStyles();
-
-        // const html = useMemo(() => {
-        //     if (task?.content) {
-        //         return edjsParser.parse(JSON.parse(task.content)).join("");
-        //     }
-        //     return '';
-        // }, [task]);
-
-        return (
-            <Flipped flipId={`task-card-${taskId}`} onAppear={onAppear}>
+    return (
+        <Flipped flipId={`task-card-${taskId}`} onAppear={onAppear}>
+            <Modal
+                opened={opened}
+                onClose={onClose}
+                title="This is fullscreen modal!"
+                transition="pop"
+                transitionDuration={200}
+                transitionTimingFunction="ease"
+                fullScreen
+            >
                 <Container p={0}>
                     {taskLoading ? <Center style={{height: '100%'}} mt={48}><Loader size={150}/></Center> :
                         <Paper shadow={'sm'} p="md" m={0}>
                             <Group position="apart" title='Автор'>
                                 <Title order={1}>{task.title}</Title>
                                 {task.author ? <Group>
-                                    <Avatar src={task.author.avatar} alt={task.author.name} radius="xl" size={'sm'}/>
+                                    <Avatar src={task.author.avatar} alt={task.author.name} radius="xl"
+                                            size={'sm'}/>
                                     <div>
                                         <Text weight={500}>
                                             {task.author.name}
@@ -132,14 +138,14 @@ const ViewTask: FC<any> = () => {
                                 : null}
                             <Divider my="xs" label="Текст задания" labelPosition="center"/>
                             <TypographyStylesProvider>
-                                <MDEditor.Markdown source={task?.content} style={{ whiteSpace: 'pre-wrap' }} />
+                                <MDEditor.Markdown source={task?.content} style={{whiteSpace: 'pre-wrap'}}/>
                                 {/*<div dangerouslySetInnerHTML={{__html: html}}></div>*/}
                             </TypographyStylesProvider>
                         </Paper>}
                 </Container>
-            </Flipped>
-        );
-    }
-;
+            </Modal>
+        </Flipped>
+    );
+};
 
-export default ViewTask;
+export default ViewTaskModal;

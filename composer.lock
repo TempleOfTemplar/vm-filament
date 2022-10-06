@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3b4d0fc0b6a2bbb432057a27df9051b9",
+    "content-hash": "0af63516c62025ef4b621674cb0fc33f",
     "packages": [
         {
             "name": "akaunting/laravel-money",
@@ -73,6 +73,87 @@
                 "source": "https://github.com/akaunting/laravel-money/tree/3.1.2"
             },
             "time": "2022-07-27T08:16:36+00:00"
+        },
+        {
+            "name": "authanram/laravel-quill",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/authanram/laravel-quill.git",
+                "reference": "31017d860881ff8fc559439247fa55fd5afa0ae5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/authanram/laravel-quill/zipball/31017d860881ff8fc559439247fa55fd5afa0ae5",
+                "reference": "31017d860881ff8fc559439247fa55fd5afa0ae5",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^9.0",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.13.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "nunomaduro/collision": "^6.0",
+                "nunomaduro/larastan": "^2.0.1",
+                "nunomaduro/phpinsights": "^2.6",
+                "orchestra/testbench": "^7.0",
+                "pestphp/pest": "^1.21",
+                "pestphp/pest-plugin-laravel": "^1.1",
+                "pestphp/pest-plugin-watch": "1.x-dev",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan-deprecation-rules": "^1.0",
+                "phpstan/phpstan-phpunit": "^1.0",
+                "phpunit/phpunit": "^9.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Authanram\\LaravelQuill\\LaravelQuillServiceProvider"
+                    ],
+                    "aliases": {
+                        "LaravelQuill": "Authanram\\LaravelQuill\\Facades\\LaravelQuill"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Authanram\\LaravelQuill\\": "src",
+                    "Authanram\\LaravelQuill\\Database\\Factories\\": "database/factories"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Seuffer",
+                    "email": "authanram@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "WORK IN PROGRESS",
+            "homepage": "https://github.com/authanram/laravel-quill",
+            "keywords": [
+                "authanram",
+                "laravel",
+                "laravel-quill"
+            ],
+            "support": {
+                "issues": "https://github.com/authanram/laravel-quill/issues",
+                "source": "https://github.com/authanram/laravel-quill/tree/master"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/authanram",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-10-03T05:26:59+00:00"
         },
         {
             "name": "awcodes/filament-curator",
@@ -13457,6 +13538,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "authanram/laravel-quill": 20,
         "templeoftemplar/filament-quill": 20
     },
     "prefer-stable": true,

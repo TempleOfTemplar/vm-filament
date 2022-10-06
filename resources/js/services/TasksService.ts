@@ -12,8 +12,13 @@ export async function getTaskById(id: string | undefined): Promise<Task> {
     return res.data;
 }
 
-export async function editTask(taskId: string, changes: Task): Promise<Task> {
-    const res = await api().patch(`/api/tasks/${taskId}`, changes);
+export async function editTask(changes: Task): Promise<Task> {
+    const res = await api().patch(`/api/tasks/${changes.id}`, changes);
+    return res.data;
+}
+
+export async function createTask(data: Task): Promise<Task> {
+    const res = await api().post(`/api/tasks`, data);
     return res.data;
 }
 

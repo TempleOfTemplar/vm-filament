@@ -39,10 +39,9 @@ class Task extends Model
         'title' => 'required|string',
         'excerpt' => 'required|string',
         'category_id' => 'required',
-        'author_id' => 'required',
-        'slug' => 'required|string',
+        'slug' => 'string',
         'content' => 'required|string',
-        'is_published' => 'required|boolean',
+        'is_published' => 'boolean',
         'created_at' => 'nullable',
         'updated_at' => 'nullable'
     ];

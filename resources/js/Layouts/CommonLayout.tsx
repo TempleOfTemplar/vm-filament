@@ -5,6 +5,18 @@ import {NotificationsProvider} from "@mantine/notifications";
 import Navbar from "../Components/Navbar";
 import {Flipper} from "react-flip-toolkit";
 
+const simultaneousAnimations = ({
+                                    hideEnteringElements,
+                                    animateEnteringElements,
+                                    animateExitingElements,
+                                    animateFlippedElements
+                                }: any) => {
+    hideEnteringElements();
+    animateExitingElements();
+    animateFlippedElements();
+    animateEnteringElements();
+};
+
 
 const CommonLayout = () => {
     const [colorScheme, setColorScheme] = useState<ColorScheme>('light');
@@ -18,8 +30,9 @@ const CommonLayout = () => {
                     <Navbar></Navbar>
                     <Flipper
                         flipKey={`${location.pathname}-${location.search}`}
+                        handleEnterUpdateDelete={simultaneousAnimations}
                     >
-                    <Outlet/>
+                        <Outlet/>
                     </Flipper>
                 </NotificationsProvider>
             </MantineProvider>

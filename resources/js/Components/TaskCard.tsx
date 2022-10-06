@@ -114,17 +114,7 @@ const TaskCard: FC<TaskCardProps> = ({task, setFavorite}) => {
     const {classes, theme} = useStyles();
     const {user} = useSanctum();
     return (
-        // <Flipped
-        //     flipId={task.id}
-        //     key={task.id}
-        //     onAppear={onElementAppear}
-        //     onExit={onExit}
-        //     spring="gentle"
-        //     stagger="task-card"
-        // >
-        /*"animated-card-in"*/
-
-        <Flipped flipId={task.id} onAppear={onAppear} onExit={onExit}>
+        <Flipped flipId={`task-card-${task.id}`} onAppear={onAppear} onExit={onExit} stagger="task-card">
             <Card withBorder radius="md" p="md"
                   className={classNames(classes.card)}>
                 <>

@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "authanram/laravel-quill": "dev-master",
         "awcodes/filament-curator": "^0.5.0",
         "based/laravel-typescript": "^0.0.3",
         "bezhansalleh/filament-shield": "^2.2",

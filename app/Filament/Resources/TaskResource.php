@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\Toy;
 use Closure;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\MultiSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieTagsInput;
@@ -50,7 +51,7 @@ class TaskResource extends Resource
                         ->relationship('toys', 'title')
                         ->options(Toy::all()->pluck('title', 'id')),
                     SpatieTagsInput::make('tags'),
-                    EditorJs::make('content')->fileAttachmentsDisk('public')->required(),
+                    MarkdownEditor::make('content')->required(),
 //                    Quill::make('content'),
                     Select::make('author_id')
                         ->relationship('author', 'name')
