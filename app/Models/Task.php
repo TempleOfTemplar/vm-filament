@@ -2,20 +2,19 @@
 
 namespace App\Models;
 
-use FilamentCurator\Models\Media;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Auth;
 use Overtrue\LaravelFavorite\Traits\Favoriteable;
+use Overtrue\LaravelLike\Traits\Likeable;
+use RyanChandler\Comments\Concerns\HasComments;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
+use willvincent\Rateable\Rateable;
 
 class Task extends Model implements HasMedia
 {
-    use HasTags;
-    use Favoriteable;
-    use InteractsWithMedia;
+    use HasTags, Favoriteable, InteractsWithMedia, HasComments, Likeable, Rateable;
 
     public $table = 'tasks';
 
@@ -23,10 +22,7 @@ class Task extends Model implements HasMedia
         'title',
         'excerpt',
         'category_id',
-        'author_id',
-        'slug',
-        'content',
-        'is_published'
+        'content'
     ];
 
     protected $casts = [

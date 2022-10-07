@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\CommentsResource\RelationManagers\CommentsRelationManager;
 use App\Filament\Resources\TaskResource\Pages;
 use App\Filament\Resources\TaskResource\RelationManagers\TagsRelationManager;
 use App\Models\Task;
@@ -22,6 +23,7 @@ use Filament\Tables\Columns\BooleanColumn;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use FilamentEditorJs\Forms\Components\EditorJs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -61,6 +63,10 @@ class TaskResource extends Resource
             ]);
     }
 
+
+
+
+
     public static function table(Table $table): Table
     {
         return $table
@@ -71,7 +77,8 @@ class TaskResource extends Resource
                 TextColumn::make('category.title')->label('категория')->sortable()->searchable(),
                 TagsColumn::make('toys.title')->label('инвентарь')->limit(2),
                 SpatieTagsColumn::make('tags')->label('теги')->limit(2),
-                BooleanColumn::make('is_published')->label('опубликовано')
+                ToggleColumn::make('is_published')->label('опубликовано')
+                // BooleanColumn::make('is_published')->label('опубликовано')
             ])
             ->filters([
                 //
@@ -87,7 +94,8 @@ class TaskResource extends Resource
     public static function getRelations(): array
     {
         return [
-            TagsRelationManager::class
+            TagsRelationManager::class,
+            CommentsRelationManager::class
         ];
     }
 

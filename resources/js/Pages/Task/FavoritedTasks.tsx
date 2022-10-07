@@ -1,37 +1,40 @@
 import React from 'react';
 import TaskCard from "../../Components/TaskCard";
-import {Affix, Button, Container, SimpleGrid, Title} from "@mantine/core";
+import {Affix, Button, Center, Container, Loader, SimpleGrid, Title} from "@mantine/core";
 import {IconCirclePlus} from "@tabler/icons";
 import {Task} from "../../Models/Task";
+import {useQuery} from "@tanstack/react-query";
+import {fetchFavoriteTasks} from "@/services/TasksService";
+import {Link} from "react-router-dom";
 
-
-//href={route("tasks.edit", id)}
 const FavoritedTasks = () => {
-    const {favoritedTasks} = usePage().props as any;
-    console.log(favoritedTasks);
+    const {
+        isLoading: favoriteTasksLoading,
+        error: favoriteTasksError,
+        data: favoriteTasksList,
+        isFetching: favoriteTasksFetching
+    } = useQuery(["favoriteTasks"], fetchFavoriteTasks, {keepPreviousData: true});
     return (
         <>
             <Container>
                 <Title order={1}>Избранные задания</Title>
-                <div className="container mx-auto">
-                    <div className="overflow-x-auto bg-white rounded shadow">
-                        <SimpleGrid cols={3}>
-                            {favoritedTasks ? favoritedTasks.map((task: Task) => (
-                                <TaskCard key={task.id} task={task}/>
-                            )) : null}
-                            {favoritedTasks.length === 0 && (
-                                <div>Ничего не найдено.</div>
-                            )}
-                        </SimpleGrid>
-
-                    </div>
-                </div>
+                {favoriteTasksLoading ? <Center mt={48}><Loader size={150}/></Center> :
+                    <SimpleGrid breakpoints={[
+                        {minWidth: 480, cols: 1, spacing: 'sm'},
+                        {minWidth: 768, cols: 2, spacing: 'sm'},
+                        {minWidth: 1024, cols: 3, spacing: 'sm'},
+                    ]}>
+                        {favoriteTasksList?.length ? favoriteTasksList.map((task: Task) => (
+                            <TaskCard key={task.id} task={task}/>
+                        )) : <div>Ничего не найдено.</div>}
+                    </SimpleGrid>
+                }
             </Container>
 
             <Affix position={{bottom: 40, right: 20}}>
                 <Button
-                    component='a'
-                    href={route("tasks.add")}
+                    component={Link}
+                    to={'/tasks/add'}
                     leftIcon={<IconCirclePlus size={16}/>}
                 >
                     Добавить задание

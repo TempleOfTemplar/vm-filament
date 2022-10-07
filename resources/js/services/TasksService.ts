@@ -12,6 +12,11 @@ export async function fetchMyTasks(): Promise<Task[]> {
     return res.data;
 }
 
+export async function fetchFavoriteTasks(): Promise<Task[]> {
+    const res = await api().get('/api/tasks/favorite')
+    return res.data;
+}
+
 export async function getTaskById(id: string | undefined): Promise<Task> {
     const res = await api().get(`/api/tasks/${id}`)
     return res.data;
@@ -28,6 +33,10 @@ export async function createTask(data: Task): Promise<Task> {
 }
 
 export async function setTaskFavorite(taskId: string): Promise<Task> {
-    const res = await api().patch(`/api/tasks/favorite/${taskId}`, {});
+    const res = await api().patch(`/api/tasks/${taskId}/favorite`, {});
+    return res.data;
+}
+export async function setTaskLiked(taskId: string): Promise<Task> {
+    const res = await api().patch(`/api/tasks/${taskId}/like`, {});
     return res.data;
 }

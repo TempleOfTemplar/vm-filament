@@ -21,14 +21,14 @@ import {Task} from "../../Models/Task";
 import {Tag} from "../../Models/Tag";
 import {Toy} from "../../Models/Toy";
 import {Category} from "../../Models/Category";
-import {ArrayParam, StringParam, useQueryParams, withDefault} from "use-query-params";
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {fetchTasks, setTaskFavorite} from "@/services/TasksService";
+import {ArrayParam, StringParam, useQueryParams} from "use-query-params";
+import {useQuery} from "@tanstack/react-query";
+import {fetchTasks} from "@/services/TasksService";
 import {fetchToys} from "@/services/ToysService";
 import {fetchTags} from "@/services/TagsService";
 import {fetchCategories} from "@/services/CategoriesService";
-import {useSearchParams} from "react-router-dom";
 import {useUpdateIsFavorite} from "@/queries/useSetTaskFavorite";
+import {useUpdateIsLiked} from "@/queries/useSetTaskLiked";
 
 
 //href={route("tasks.edit", id)}
@@ -39,7 +39,8 @@ const ListTasks = () => {
         toys: ArrayParam,
         tags: ArrayParam,
     }, {});
-    const updateIsFavorite = useUpdateIsFavorite(query);
+    const updateIsFavorite = useUpdateIsFavorite("tasks", query);
+    const updateIsLiked = useUpdateIsLiked("tasks", query);
 
 
     const [firstTasksLoaded, setFirstTasksLoaded] = useState<boolean>(false);
@@ -155,6 +156,11 @@ const ListTasks = () => {
             updateIsFavorite.mutate(task.id.toString());
         }
     }
+    const setLiked = (task: Task) => {
+        if (task?.id) {
+            updateIsLiked.mutate(task.id.toString());
+        }
+    }
     return (
         <>
             <Container>
@@ -191,7 +197,7 @@ const ListTasks = () => {
                                 {minWidth: 1024, cols: 3, spacing: 'sm'},
                             ]}>
                                 {tasksList?.length ? tasksList.map((task: Task) => (
-                                    <TaskCard key={task.id} task={task} setFavorite={setFavorite}/>
+                                    <TaskCard key={task.id} task={task} setFavorite={setFavorite} setLike={setLiked}/>
                                 )) : <div>Ничего не найдено.</div>}
                             </SimpleGrid>}
 

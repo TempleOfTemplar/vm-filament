@@ -197,6 +197,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         LaravelMediaServiceProvider::class,
         L5Swagger\L5SwaggerServiceProvider::class,
+        willvincent\Rateable\RateableServiceProvider::class
     ],
 
     /*

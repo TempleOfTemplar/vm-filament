@@ -16,7 +16,6 @@
         "filament/spatie-laravel-tags-plugin": "^2.0",
         "guzzlehttp/guzzle": "^7.2",
         "http-interop/http-factory-guzzle": "^1.2",
-        "inertiajs/inertia-laravel": "^0.6.3",
         "infyomlabs/adminlte-templates": "^5.0",
         "infyomlabs/laravel-generator": "^5.0",
         "itsgoingd/clockwork": "^5.1",
@@ -28,16 +27,16 @@
         "meilisearch/meilisearch-php": "^0.24.2",
         "mtrajano/laravel-swagger": "^0.6.4",
         "overtrue/laravel-favorite": "^5.0",
-        "rahmanramsi/filament-editorjs": "1.0.1",
-        "rawilk/laravel-form-components": "^7.1",
+        "overtrue/laravel-like": "^5.0",
+        "ryangjchandler/laravel-comments": "^0.1.0",
         "socialiteproviders/google": "^4.1",
         "socialiteproviders/vkontakte": "^5.0",
         "spatie/laravel-medialibrary": "^9.0.0 | ^10.0.0",
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-typescript-transformer": "^2.1",
-        "templeoftemplar/filament-quill": "dev-master",
         "tightenco/ziggy": "^1.0",
-        "tjmpromos/sortable-gallery": "dev-main"
+        "tjmpromos/sortable-gallery": "dev-main",
+        "willvincent/laravel-rateable": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

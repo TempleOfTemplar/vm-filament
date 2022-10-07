@@ -1,6 +1,6 @@
-import React, {FC} from 'react';
+import React, {FC, useState} from 'react';
 import {Task} from "../Models/Task";
-import {IconHeart, IconPencil} from '@tabler/icons';
+import {IconBookmark, IconHeart, IconPencil, IconShare} from '@tabler/icons';
 import {
     ActionIcon,
     Avatar,
@@ -20,9 +20,10 @@ import {Toy} from "../Models/Toy";
 import {Tag} from "../Models/Tag";
 import * as classNames from "classnames";
 import {useSanctum} from "react-sanctum";
-import {Link} from "react-router-dom";
+import {Link, useHref} from "react-router-dom";
 import "./TaskCard.css";
 import {Flipped, spring} from "react-flip-toolkit";
+import {RWebShare} from "react-web-share";
 
 const onAppear = (el: any, i: any) => {
     spring({
@@ -87,17 +88,36 @@ const useStyles = createStyles((theme) => ({
     likeFilled: {
         fill: theme.colors.red[6],
     },
+    likeCountText: {
+        verticalAlign: 'center',
+        lineHeight: '18px',
+        marginTop: '-2px',
+    },
+    bookmark: {
+        color: theme.colors.yellow[6]
+    },
+    bookmarkFilled: {
+        fill: theme.colors.yellow[6],
+    },
     editButton: {},
     label: {
         textTransform: 'uppercase',
         fontSize: theme.fontSizes.xs,
         fontWeight: 700,
     },
+    footer: {
+        padding: `${theme.spacing.xs}px ${theme.spacing.lg}px`,
+        marginTop: theme.spacing.md,
+        borderTop: `1px solid ${
+            theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]
+        }`,
+    },
 }));
 
 interface TaskCardProps {
     task: Task;
     setFavorite?: (task: Task) => void
+    setLike?: (task: Task) => void
 }
 
 // const onElementAppear = (el: any, index: any) => {
@@ -110,9 +130,15 @@ interface TaskCardProps {
 //     setTimeout(removeElement, 200);
 // };
 
-const TaskCard: FC<TaskCardProps> = ({task, setFavorite}) => {
+const TaskCard: FC<TaskCardProps> = ({task, setFavorite, setLike}) => {
     const {classes, theme} = useStyles();
     const {user} = useSanctum();
+    const linkToTask = useHref(`/tasks/${task.id}`);
+    const [sitesToShare,] = useState([
+        'telegram',
+        'copy',
+        'vk'
+    ]);
     return (
         <Flipped flipId={`task-card-${task.id}`} onAppear={onAppear} onExit={onExit} stagger="task-card">
             <Card withBorder radius="md" p="md"
@@ -205,20 +231,43 @@ const TaskCard: FC<TaskCardProps> = ({task, setFavorite}) => {
                             <IconPencil size={18} stroke={1.5}/>
                         </ActionIcon> : null}
                     </Group> : null}
-
                     <Group mt="xs">
-
-                        <Button component={Link} radius="md" style={{flex: 1}} to={`/tasks/${task.id}`}>
-                            Читать
-                        </Button>
-
-                        <ActionIcon variant="default" radius="md" size={36}
-                                    onClick={() => setFavorite ? setFavorite(task) : null}>
-                            <IconHeart size={18}
-                                       className={classNames(classes.like, {[classes.likeFilled]: task.has_favorited})}
-                                       stroke={1.5}/>
-                        </ActionIcon>
+                        {/*<Rating></Rating>*/}
                     </Group>
+
+                    <Card.Section className={classes.footer}>
+                        <Group position="apart">
+                            <Button component={Link} radius="md" to={`/tasks/${task.id}`}>
+                                Читать
+                            </Button>
+                            <Group spacing={4}>
+                                {setLike ? <ActionIcon variant="default" radius="md" size={36}>
+                                    <Text className={classes.likeCountText}>{task.likers_count}</Text>
+                                    <IconHeart size={18}
+                                               onClick={() => setLike(task)}
+                                               className={classNames(classes.like, {[classes.likeFilled]: task.has_liked})}
+                                               stroke={1.5}/>
+                                </ActionIcon> : null}
+                                {setFavorite ? <ActionIcon variant="default" radius="md" size={36}
+                                                           onClick={() => setFavorite(task)}>
+                                    <IconBookmark size={18}
+                                                  className={classNames(classes.bookmark, {[classes.bookmarkFilled]: task.has_favorited})}
+                                                  stroke={1.5}/>
+                                </ActionIcon> : null}
+                                <RWebShare
+                                    sites={sitesToShare}
+                                    data={{
+                                        text: `${task.title}%0D%0A${task.excerpt}`,
+                                        url: linkToTask,
+                                        title: "Поделиться заданием",
+                                    }}>
+                                    <ActionIcon variant="default" radius="md" size={36}>
+                                        <IconShare size={16} color={theme.colors.blue[6]} stroke={1.5}/>
+                                    </ActionIcon>
+                                </RWebShare>
+                            </Group>
+                        </Group>
+                    </Card.Section>
                 </>
             </Card>
         </Flipped>

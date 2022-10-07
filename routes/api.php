@@ -17,8 +17,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/tasks/attachImage', [TaskAPIController::class, 'attachImage'])->name('tasks.attachImage') ->middleware(['auth', 'verified']);
-Route::patch('/tasks/favorite/{task}', [TaskAPIController::class, 'setTaskFavorite'])->name('tasks.setFavorite') ->middleware(['auth', 'verified']);
+Route::patch('/tasks/{task}/favorite', [TaskAPIController::class, 'setTaskFavorite'])->name('tasks.setFavorite') ->middleware(['auth', 'verified']);
+Route::patch('/tasks/{task}/like', [TaskAPIController::class, 'setTaskLiked'])->name('tasks.setLiked') ->middleware(['auth', 'verified']);
+
 Route::get('/tasks/my', [TaskAPIController::class, 'myTasks'])->name('tasks.my') ->middleware(['auth', 'verified']);
+Route::get('/tasks/favorite', [TaskAPIController::class, 'favoriteTasks'])->name('tasks.favorite') ->middleware(['auth', 'verified']);
 Route::resource('tasks', App\Http\Controllers\API\TaskAPIController::class);
 
 Route::resource('toys', App\Http\Controllers\API\ToyAPIController::class)

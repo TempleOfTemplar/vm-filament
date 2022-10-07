@@ -17,11 +17,11 @@ const ListMyTasks = () => {
         data: myTasksList,
         isFetching: myTasksFetching
     } = useQuery(["myTasks"], fetchMyTasks, {keepPreviousData: true});
-    // const updateIsFavorite = useUpdateIsFavorite(query);
+    const updateIsFavorite = useUpdateIsFavorite("myTasks");
     const setFavorite = (task: Task) => {
-        // if (task?.id) {
-        //     updateIsFavorite.mutate(task.id.toString());
-        // }
+        if (task?.id) {
+            updateIsFavorite.mutate(task.id.toString());
+        }
     }
     return (
         <>
@@ -36,7 +36,8 @@ const ListMyTasks = () => {
                         {myTasksList?.length ? myTasksList.map((task: Task) => (
                             <TaskCard key={task.id} task={task} setFavorite={setFavorite}/>
                         )) : <div>Ничего не найдено.</div>}
-                    </SimpleGrid>}
+                    </SimpleGrid>
+                }
             </Container>
 
             <Affix position={{bottom: 40, right: 20}}>

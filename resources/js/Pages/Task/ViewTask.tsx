@@ -23,6 +23,7 @@ import {Flipped, spring} from "react-flip-toolkit";
 import {useQuery} from "@tanstack/react-query";
 import {getTaskById} from "@/services/TasksService";
 import MDEditor from '@uiw/react-md-editor';
+import Comment from "@/Components/Comment";
 
 const edjsParser = edjsHTML();
 
@@ -135,6 +136,9 @@ const ViewTask: FC<any> = () => {
                                 <MDEditor.Markdown source={task?.content} style={{ whiteSpace: 'pre-wrap' }} />
                             </TypographyStylesProvider>
                         </Paper>}
+                    <Paper>
+                        {task?.comments?.map((comment) => <Comment key={comment.id} comment={comment}/>)}
+                    </Paper>
                 </Container>
             </Flipped>
         );
