@@ -1,6 +1,6 @@
 import React, {FC, useState} from 'react';
 import {Task} from "../Models/Task";
-import {IconBookmark, IconHeart, IconPencil, IconShare} from '@tabler/icons';
+import {IconBookmark, IconHeart, IconMessage, IconPencil, IconShare} from '@tabler/icons';
 import {
     ActionIcon,
     Avatar,
@@ -18,7 +18,7 @@ import {
 } from '@mantine/core';
 import {Toy} from "../Models/Toy";
 import {Tag} from "../Models/Tag";
-import * as classNames from "classnames";
+import classNames from "classnames";
 import {useSanctum} from "react-sanctum";
 import {Link, useHref} from "react-router-dom";
 import "./TaskCard.css";
@@ -99,6 +99,7 @@ const useStyles = createStyles((theme) => ({
     bookmarkFilled: {
         fill: theme.colors.yellow[6],
     },
+    comment: {},
     editButton: {},
     label: {
         textTransform: 'uppercase',
@@ -132,13 +133,20 @@ interface TaskCardProps {
 
 const TaskCard: FC<TaskCardProps> = ({task, setFavorite, setLike}) => {
     const {classes, theme} = useStyles();
+    const [commentsOpened, setCommentsOpened] = useState<boolean>(false);
     const {user} = useSanctum();
-    const linkToTask = useHref(`/tasks/${task.id}`);
+    const [linkToTask, setLinkToTask] = useState(`${window.location.protocol}${window.location.hostname}/tasks/${task.id}`);
     const [sitesToShare,] = useState([
-        'telegram',
         'copy',
-        'vk'
+        'telegram',
+        'vk',
+        'whatsapp'
     ]);
+
+    function toggleComments(): void {
+        setCommentsOpened(!commentsOpened);
+    }
+
     return (
         <Flipped flipId={`task-card-${task.id}`} onAppear={onAppear} onExit={onExit} stagger="task-card">
             <Card withBorder radius="md" p="md"
@@ -241,6 +249,12 @@ const TaskCard: FC<TaskCardProps> = ({task, setFavorite, setLike}) => {
                                 Читать
                             </Button>
                             <Group spacing={4}>
+                                <ActionIcon variant="default" radius="md" size={36}>
+                                    <IconMessage size={18}
+                                                 onClick={() => toggleComments()}
+                                                 className={classNames(classes.comment)}
+                                                 stroke={1.5}/>
+                                </ActionIcon>
                                 {setLike ? <ActionIcon variant="default" radius="md" size={36}>
                                     <Text className={classes.likeCountText}>{task.likers_count}</Text>
                                     <IconHeart size={18}
@@ -256,8 +270,9 @@ const TaskCard: FC<TaskCardProps> = ({task, setFavorite, setLike}) => {
                                 </ActionIcon> : null}
                                 <RWebShare
                                     sites={sitesToShare}
+                                    disableNative={true}
                                     data={{
-                                        text: `${task.title}%0D%0A${task.excerpt}`,
+                                        text: `Вам задание "${task.title}" от virtual-mistress`,
                                         url: linkToTask,
                                         title: "Поделиться заданием",
                                     }}>

@@ -4,7 +4,7 @@ import {useDisclosure} from '@mantine/hooks';
 import {IconChevronDown, IconTrash,} from '@tabler/icons';
 import ApplicationLogo from "./ApplicationLogo";
 import DarkThemeToggle from "./DarkThemeToggle";
-import {withSanctum} from "react-sanctum";
+import {useSanctum, withSanctum} from "react-sanctum";
 import {Link} from "react-router-dom";
 
 const HEADER_HEIGHT = 60;
@@ -108,6 +108,7 @@ const AppHeader: FC<NavbarProps> = ({user}) => {
     const {classes, theme, cx} = useStyles();
     const [opened, {toggle}] = useDisclosure(false);
     const [userMenuOpened, setUserMenuOpened] = useState(false);
+    const { signOut } = useSanctum();
 
     return (
         <Header height={HEADER_HEIGHT} mt={0} mb={0} px={16} className={classes.root}>
@@ -168,8 +169,8 @@ const AppHeader: FC<NavbarProps> = ({user}) => {
                             <Menu.Item color="red">
                                 <DarkThemeToggle/>
                             </Menu.Item>
-                            <Menu.Item color="red" icon={<IconTrash size={14} stroke={1.5}/>}>
-                                Delete account
+                            <Menu.Item color="red" icon={<IconTrash size={14} stroke={1.5}/>} onClick={signOut}>
+                                Logout
                             </Menu.Item>
                         </Menu.Dropdown>
                     </Menu> : null}

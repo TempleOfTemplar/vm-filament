@@ -1,4 +1,4 @@
-import React, {FC, useMemo} from 'react';
+import React, {FC} from 'react';
 import {
     Avatar,
     Badge,
@@ -14,7 +14,6 @@ import {
     Title,
     TypographyStylesProvider
 } from "@mantine/core";
-import edjsHTML from 'editorjs-html';
 import {Carousel} from "@mantine/carousel";
 import {useParams} from 'react-router-dom';
 import {Tag} from "@/Models/Tag";
@@ -24,8 +23,8 @@ import {useQuery} from "@tanstack/react-query";
 import {getTaskById} from "@/services/TasksService";
 import MDEditor from '@uiw/react-md-editor';
 import Comment from "@/Components/Comment";
+import {VditorPreview} from "react-vditor";
 
-const edjsParser = edjsHTML();
 
 const useStyles = createStyles((theme) => ({}));
 
@@ -61,6 +60,7 @@ const ViewTask: FC<any> = () => {
 
         return (
             <Flipped flipId={`task-card-${taskId}`} onAppear={onAppear}>
+                {/*<Seo title={task?.title} description={task?.excerpt} name={} type={}*/}
                 <Container p={0}>
                     {taskLoading ? <Center style={{height: '100%'}} mt={48}><Loader size={150}/></Center> :
                         <Paper shadow={'sm'} p="md" m={0}>
@@ -131,10 +131,12 @@ const ViewTask: FC<any> = () => {
                                     </Carousel>
                                 </>
                                 : null}
-                            <Divider my="xs" label="Текст задания" labelPosition="center"/>
-                            <TypographyStylesProvider>
-                                <MDEditor.Markdown source={task?.content} style={{ whiteSpace: 'pre-wrap' }} />
-                            </TypographyStylesProvider>
+                            {task?.content ? <>
+                                <Divider my="xs" label="Текст задания" labelPosition="center"/>
+                                <TypographyStylesProvider>
+                                    <VditorPreview markdown={task.content}/>
+                                </TypographyStylesProvider>
+                            </> : null}
                         </Paper>}
                     <Paper>
                         {task?.comments?.map((comment) => <Comment key={comment.id} comment={comment}/>)}

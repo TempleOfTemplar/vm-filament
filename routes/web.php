@@ -8,7 +8,6 @@ use App\Http\Controllers\ToyController;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,10 +35,10 @@ use Inertia\Inertia;
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
 
-require __DIR__.'/auth.php';
-Route::middleware('auth:sanctum')->get('user', function (Request $request) {
-    return $request->user();
-});
+//require __DIR__.'/auth.php';
+//Route::middleware('auth:sanctum')->get('user', function (Request $request) {
+//    return $request->user();
+//});
 Route::controller(SocialController::class)->group(function () {
     Route::get('vk/auth/callback', 'loginWithVkontakte');
     Route::get('vk/auth', 'vkontakteRedirect')->name('auth.vk');
@@ -47,8 +46,9 @@ Route::controller(SocialController::class)->group(function () {
     Route::get('google/auth/callback', 'loginWithGoogle');
     Route::get('google/auth', 'googleRedirect')->name('auth.google');
 });
+
 Route::get('/{any}', function () {
-    return view('app');
+    return view('index');
 })->where('any', '^(?!api).*$');
 
 //Route::get('/tasks', [TaskController::class, 'index'])->name('tasks') ->middleware(['auth', 'verified']);
@@ -64,6 +64,6 @@ Route::get('/{any}', function () {
 //Route::resource('categories', CategoryController::class)->middleware(['auth', 'verified']);
 //Route::resource('tags', TagController::class)->middleware(['auth', 'verified']);
 
-Auth::routes();
+//Auth::routes();
 
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

@@ -6,7 +6,7 @@ import {Sanctum} from "react-sanctum";
 import {QueryParamProvider} from 'use-query-params';
 import {ReactRouter6Adapter} from 'use-query-params/adapters/react-router-6';
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import 'react-markdown-editor-lite/lib/index.css';
+import {HelmetProvider} from 'react-helmet-async';
 
 const container = document.getElementById('app')!;
 const root = createRoot(container);
@@ -21,18 +21,20 @@ const queryClient = new QueryClient({
 const sanctumConfig = {
     apiUrl: "",
     csrfCookieRoute: "sanctum/csrf-cookie",
-    signInRoute: "login",
-    signOutRoute: "logout",
-    userObjectRoute: "user",
+    signInRoute: "api/login",
+    signOutRoute: "api/logout",
+    userObjectRoute: "api/auth/user",
 };
 root.render(
-    <QueryClientProvider client={queryClient}>
-        <Sanctum config={sanctumConfig}>
-            <BrowserRouter>
-                <QueryParamProvider adapter={ReactRouter6Adapter}>
-                    <App/>
-                </QueryParamProvider>
-            </BrowserRouter>
-        </Sanctum>
-    </QueryClientProvider>
+    <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+            <Sanctum config={sanctumConfig}>
+                <BrowserRouter>
+                    <QueryParamProvider adapter={ReactRouter6Adapter}>
+                        <App/>
+                    </QueryParamProvider>
+                </BrowserRouter>
+            </Sanctum>
+        </QueryClientProvider>
+    </HelmetProvider>
 );
