@@ -53,6 +53,7 @@ class TaskAPIController extends AppBaseController
             ->with('category')
             ->with('tags')
             ->with('author')
+            ->with('comments')
             ->get();
 
         $tasks = Auth::user()->attachFavoriteStatus($tasks);
