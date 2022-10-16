@@ -28,6 +28,8 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 Route::post('/tasks/attachImage', [TaskAPIController::class, 'attachImage'])->name('tasks.attachImage') ->middleware(['auth', 'verified']);
 Route::patch('/tasks/{task}/favorite', [TaskAPIController::class, 'setTaskFavorite'])->name('tasks.setFavorite') ->middleware(['auth', 'verified']);
 Route::patch('/tasks/{task}/like', [TaskAPIController::class, 'setTaskLiked'])->name('tasks.setLiked') ->middleware(['auth', 'verified']);
+Route::get('/tasks/{task}/comments', [TaskAPIController::class, 'getComments'])->name('tasks.getComments') ->middleware(['auth', 'verified']);
+Route::post('/tasks/{task}/addComment', [TaskAPIController::class, 'addComment'])->name('tasks.addComment') ->middleware(['auth', 'verified']);
 
 Route::get('/tasks/my', [TaskAPIController::class, 'myTasks'])->name('tasks.my') ->middleware(['auth', 'verified']);
 Route::get('/tasks/favorite', [TaskAPIController::class, 'favoriteTasks'])->name('tasks.favorite') ->middleware(['auth', 'verified']);

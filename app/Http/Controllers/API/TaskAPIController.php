@@ -147,6 +147,34 @@ class TaskAPIController extends AppBaseController
         return $this->sendResponse($media, 'Task retrieved successfully');
     }
 
+    public function addComment(Request $request): JsonResponse
+    {
+        $taskId = $request->input('taskId');
+        $comment = $request->input('comment');
+        $task = $this->taskRepository->find($taskId);
+
+        if (empty($task)) {
+            return $this->sendError(`Task with id ${$taskId} not found`);
+        }
+
+        $addedComment = $task->comment($comment);
+        // $taskToReturn = $task->load(['tags', 'category', 'toys', 'author', 'comments']);
+        return $this->sendResponse($addedComment, 'Comment added successfully');
+    }
+
+    public function getComments(Task $task): JsonResponse
+    {
+//        dd($task);
+
+        $comments = [];//pluck('comments')->collapse();;
+        foreach($task->comments as $comment)
+        {
+            array_push($comments, $comment);
+            // working with comment here...
+        }
+        return $this->sendResponse($task->comments, 'Comments retrieved successfully');
+    }
+
     /**
      * Update the specified Task in storage.
      * PUT/PATCH /tasks/{id}

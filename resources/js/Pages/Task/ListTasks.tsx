@@ -17,10 +17,10 @@ import {
 } from "@mantine/core";
 import {IconCirclePlus, IconSearch} from "@tabler/icons";
 import useDebounce from "../../Hooks/useDebounce";
-import {Task} from "../../Models/Task";
-import {Tag} from "../../Models/Tag";
-import {Toy} from "../../Models/Toy";
-import {Category} from "../../Models/Category";
+import {Task} from "@/Models/Task";
+import {Tag} from "@/Models/Tag";
+import {Toy} from "@/Models/Toy";
+import {Category} from "@/Models/Category";
 import {ArrayParam, StringParam, useQueryParams} from "use-query-params";
 import {useQuery} from "@tanstack/react-query";
 import {fetchTasks} from "@/services/TasksService";

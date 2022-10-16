@@ -2,6 +2,7 @@ import React, {FC} from 'react';
 import {
     Avatar,
     Badge,
+    Button,
     Center,
     Container,
     createStyles,
@@ -11,6 +12,7 @@ import {
     Loader,
     Paper,
     Text,
+    Textarea,
     Title,
     TypographyStylesProvider
 } from "@mantine/core";
@@ -20,10 +22,13 @@ import {Tag} from "@/Models/Tag";
 import {Toy} from "@/Models/Toy";
 import {Flipped, spring} from "react-flip-toolkit";
 import {useQuery} from "@tanstack/react-query";
-import {getTaskById} from "@/services/TasksService";
-import MDEditor from '@uiw/react-md-editor';
-import Comment from "@/Components/Comment";
+import {fetchTaskComments, getTaskById} from "@/services/TasksService";
+import CommentListItem from "@/Components/CommentListItem";
 import {VditorPreview} from "react-vditor";
+import {useForm} from "@mantine/form";
+import {useAddTaskCommentMutation} from "@/queries/useAddTaskCommentMutation";
+import useTaskCommentsQuery from "@/queries/useTaskCommentsQuery";
+import {Comment} from "postcss";
 
 
 const useStyles = createStyles((theme) => ({}));
@@ -45,18 +50,32 @@ const onAppear = (el: any, i: any) => {
     });
 }
 
+interface AddCommentFormValues {
+    comment: string;
+}
+
 const ViewTask: FC<any> = () => {
         let {taskId} = useParams<string>();
 
         const {data: task, isLoading: taskLoading} = useQuery(["tasks", taskId], () => getTaskById(taskId));
+        const {data: comments, isLoading: commentsLoading} = useTaskCommentsQuery(taskId);
         const {classes, theme} = useStyles();
-
+        const form = useForm<AddCommentFormValues>({initialValues: {comment: ''}});
+        const addTaskCommentMutation = useAddTaskCommentMutation();
         // const html = useMemo(() => {
         //     if (task?.content) {
         //         return edjsParser.parse(JSON.parse(task.content)).join("");
         //     }
         //     return '';
         // }, [task]);
+        function onAddCommentFormSubmit(values: AddCommentFormValues) {
+            console.log("onAddCommentFormSubmit", values);
+            if (taskId) {
+                const dataToSend = {taskId, ...values};
+                console.log("dataToSend", dataToSend);
+                addTaskCommentMutation.mutate(dataToSend);
+            }
+        }
 
         return (
             <Flipped flipId={`task-card-${taskId}`} onAppear={onAppear}>
@@ -139,7 +158,17 @@ const ViewTask: FC<any> = () => {
                             </> : null}
                         </Paper>}
                     <Paper>
-                        {task?.comments?.map((comment) => <Comment key={comment.id} comment={comment}/>)}
+                        {comments?.map((comment) => <CommentListItem key={comment.id} comment={comment}/>)}
+                        <form onSubmit={form.onSubmit((values) => {
+                            onAddCommentFormSubmit(values)
+                        })}>
+                            <Group position="right" mt="md">
+                                <Textarea  {...form.getInputProps('comment')}
+                                           placeholder="Добавить комментарий..."
+                                />
+                                <Button type="submit">Отправить</Button>
+                            </Group>
+                        </form>
                     </Paper>
                 </Container>
             </Flipped>

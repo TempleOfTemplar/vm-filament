@@ -14,7 +14,7 @@ use willvincent\Rateable\Rateable;
 
 class Task extends Model implements HasMedia
 {
-    use HasTags, Favoriteable, InteractsWithMedia, HasComments, Likeable, Rateable;
+    use HasTags, Favoriteable, InteractsWithMedia, HasComments, Likeable;
 
     public $table = 'tasks';
 

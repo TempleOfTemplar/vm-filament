@@ -48,7 +48,7 @@ Route::controller(SocialController::class)->group(function () {
 });
 
 Route::get('/{any}', function () {
-    return view('index');
+    return view('app');
 })->where('any', '^(?!api).*$');
 
 //Route::get('/tasks', [TaskController::class, 'index'])->name('tasks') ->middleware(['auth', 'verified']);

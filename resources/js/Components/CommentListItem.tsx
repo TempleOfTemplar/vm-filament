@@ -14,7 +14,7 @@ interface TaskCommentProps {
     comment: TaskComment;
 }
 
-const Comment: FC<TaskCommentProps> = ({comment}) => {
+const CommentListItem: FC<TaskCommentProps> = ({comment}) => {
     const {classes} = useStyles();
 
     return (
@@ -35,4 +35,4 @@ const Comment: FC<TaskCommentProps> = ({comment}) => {
     );
 };
 
-export default Comment;
+export default CommentListItem;
