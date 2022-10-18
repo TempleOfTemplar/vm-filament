@@ -65,6 +65,7 @@
         "react-router-dom": "^6.4.2",
         "react-sanctum": "^2.3.1",
         "react-vditor": "^0.2.1",
+        "react-virtuoso": "^3.1.0",
         "react-web-share": "^2.0.0",
         "rehype-sanitize": "^5.0.1",
         "use-query-params": "^2.1.1",

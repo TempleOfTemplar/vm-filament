@@ -1,6 +1,6 @@
 import React, {FC, useState} from 'react';
 import {Task} from "../Models/Task";
-import {IconBookmark, IconHeart, IconMessage, IconPencil, IconShare} from '@tabler/icons';
+import {IconBookmark, IconHeart, IconPencil, IconShare} from '@tabler/icons';
 import {
     ActionIcon,
     Avatar,
@@ -131,7 +131,7 @@ interface TaskCardProps {
 //     setTimeout(removeElement, 200);
 // };
 
-const TaskCard: FC<TaskCardProps> = ({task, setFavorite, setLike, ref}) => {
+const TaskCard: FC<TaskCardProps> = ({task, setFavorite, setLike}) => {
     const {classes, theme} = useStyles();
     const [commentsOpened, setCommentsOpened] = useState<boolean>(false);
     const {user} = useSanctum();

@@ -1,8 +1,8 @@
-import React, {ChangeEvent, useEffect, useMemo, useRef, useState} from 'react';
+import React, {ChangeEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     Affix,
     Button,
-    Container,
+    Container, createStyles,
     Group,
     MultiSelect,
     Select,
@@ -29,13 +29,23 @@ import {useUpdateIsLiked} from "@/queries/useSetTaskLiked";
 import {useInView} from "react-intersection-observer";
 import TaskCard from "@/Components/TaskCard";
 import {TasksCursorPaginator} from "@/Models/CursorPaginator";
-import {useVirtualizer} from "@tanstack/react-virtual";
+import {VirtuosoGrid} from 'react-virtuoso'
 
+const useStyles = createStyles((theme) => ({
+    gridList: {
+        display: "flex",
+        flexWrap: "wrap"
+    },
+    gridItem: {
+        width: "calc(100% / 3)"
+    }
+}));
 
 //href={route("tasks.edit", id)}
 const ListTasksInfinite = () => {
     const {ref, inView} = useInView()
     const parentRef = useRef<any>()
+    const {classes, theme} = useStyles();
     const {
         status,
         data: tasksPaginationData,
@@ -112,15 +122,24 @@ const ListTasksInfinite = () => {
     //     data: tasksList,
     //     isFetching: tasksFetching
     // } = useQuery(["tasks", query], fetchTasks, {keepPreviousData: true});
-    const tasksList = (tasksPaginationData as any)?.pages ? (tasksPaginationData as any).pages[0].data : [];
-    const rowVirtualizer = useVirtualizer({
-        count: hasNextPage ? tasksList.length + 1 : tasksList.length,
-        getScrollElement: () => parentRef?.current,
-        estimateSize: () => 467,
-        horizontal: false,
-        overscan: 6,
-    })
-    console.log(tasksList);
+    const tasksList: Task[] = (tasksPaginationData as any)?.pages ? (tasksPaginationData as any).pages.map((page: any) => page.data).flat() : [];
+    // const tasksList: Task[] = useMemo(() => {
+    //     return (tasksPaginationData as any)?.pages ? (tasksPaginationData as any).pages[0].data : [];
+    // }, [tasksPaginationData]);
+    console.log("tasksList", tasksList);
+
+    const loadMore = useCallback(() => {
+        console.log("LOAD MORE");
+        fetchNextPage();
+    }, []);
+    // const rowVirtualizer = useVirtualizer({
+    //     count: hasNextPage ? tasksList.length + 1 : tasksList.length,
+    //     getScrollElement: () => parentRef?.current,
+    //     estimateSize: () => 467,
+    //     horizontal: false,
+    //     overscan: 6,
+    // })
+    // console.log(tasksList);
 
     // useEffect(() => {
     //     if (tasksLoading) {
@@ -258,112 +277,70 @@ const ListTasksInfinite = () => {
                         </Group>
                     </Stack>
                     <Space h="md"/>
+                    {tasksList.length}
                     <div className="overflow-x-auto bg-white rounded shadow">
-
-                        {/*                        {status === 'loading' ? (
-                            <p>Loading...</p>
-                        ) : status === 'error' ? (
-                            <span>Error: {(error as Error).message}</span>
-                        ) : (
-                            <div
-                                ref={parentRef}
-                                className="List"
-                                style={{
-                                    height: `500px`,
-                                    width: `100%`,
-                                    overflow: 'auto',
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        height: `${rowVirtualizer.getTotalSize()}px`,
-                                        width: '100%',
-                                        position: 'relative',
-                                    }}
-                                >
-                                    {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                                        const isLoaderRow = virtualRow.index > allRows.length - 1
-                                        const post = allRows[virtualRow.index]
-
-                                        return (
-                                            <div
-                                                key={virtualRow.index}
-                                                className={
-                                                    virtualRow.index % 2 ? 'ListItemOdd' : 'ListItemEven'
-                                                }
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: 0,
-                                                    left: 0,
-                                                    width: '100%',
-                                                    height: `${virtualRow.size}px`,
-                                                    transform: `translateY(${virtualRow.start}px)`,
-                                                }}
-                                            >
-                                                {isLoaderRow
-                                                    ? hasNextPage
-                                                        ? 'Loading more...'
-                                                        : 'Nothing more to load'
-                                                    : post}
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                        )};
-                        <div>
-                            {isFetching && !isFetchingNextPage ? 'Background Updating...' : null}
-                        </div>*/}
                         {status === 'loading' ? (
                             <p>Loading...</p>
                         ) : status === 'error' ? (
                             <span>Error: {(tasksError as Error).message}</span>
                         ) : (
-                            <div ref={parentRef}
-                                 className="List"
-                                 style={{
-                                     height: `500px`,
-                                     width: `100%`,
-                                     overflow: 'auto',
-                                 }}>
-                                <SimpleGrid style={{
-                                    height: `${rowVirtualizer.getTotalSize()}px`,
-                                    width: '100%',
-                                    position: 'relative'
-                                }} breakpoints={[
-                                    {minWidth: 480, cols: 1, spacing: 'sm'},
-                                    {minWidth: 768, cols: 2, spacing: 'sm'},
-                                    {minWidth: 1024, cols: 3, spacing: 'sm'},
-                                ]}>
-                                    {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                                        const isLoaderRow = virtualRow.index > tasksList.length - 1
-                                        const task = tasksList[virtualRow.index];
-                                        if (isLoaderRow) {
-                                            return hasNextPage ? 'Loading more...' : 'Nothing more to load';
-                                        } else {
-                                            const column = virtualRow.index % 3;
-                                            const row = Math.floor(virtualRow.index / 3); // int col = index / mRowCount;
-                                            console.log(virtualRow.index, "col: ", column, " row: ", row);
-                                            return <div key={virtualRow.index}
-                                                        style={{
-                                                            position: 'absolute',
-                                                            top: 0,
-                                                            left: `calc((100% / 3) * ${(virtualRow.index % 3)})`,
-                                                            width: 'calc(100% / 3)',
-                                                            height: `${virtualRow.size}px`,
-                                                            transform: `translateY(${row * virtualRow.size}px)`
-                                                        }}>
-                                                <TaskCard
+                            tasksList.length ? <VirtuosoGrid
+                                style={{height: 600}}
+                                overscan={200}
+                                data={tasksList}
+                                listClassName={classes.gridList}
+                                itemClassName={classes.gridItem}
+                                endReached={loadMore}
+                                itemContent={(index, task: Task) => {
+                                    console.log("ITASK", index, task);
+                                    return <TaskCard
+                                        task={tasksList[index]}
+                                        setFavorite={setFavorite}
+                                        setLike={setLiked}/>
+                                }
+                                }
+                                // scrollSeekConfiguration={{
+                                //     enter: velocity => Math.abs(velocity) > 200,
+                                //     exit: velocity => Math.abs(velocity) < 30,
+                                //     change: (_, range) => console.log({range}),
+                                // }}
+                            /> : null
 
-                                                    task={task}
-                                                    setFavorite={setFavorite}
-                                                    setLike={setLiked}/>
-                                            </div>
-                                        }
-                                    })
-                                    }
-                                </SimpleGrid>
-                            </div>
+                            // <div ref={parentRef}
+                            //      className="List"
+                            //      style={{
+                            //          height: `500px`,
+                            //          width: `100%`,
+                            //          overflow: 'auto',
+                            //      }}>
+                            //     <SimpleGrid style={{
+                            //         height: `${rowVirtualizer.getTotalSize()}px`,
+                            //         width: '100%',
+                            //         position: 'relative'
+                            //     }} breakpoints={[
+                            //         {minWidth: 480, cols: 1, spacing: 'sm'},
+                            //         {minWidth: 768, cols: 2, spacing: 'sm'},
+                            //         {minWidth: 1024, cols: 3, spacing: 'sm'},
+                            //     ]}>
+                            //         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                            //             const isLoaderRow = virtualRow.index > tasksList.length - 1
+                            //             const task = tasksList[virtualRow.index];
+                            //             if (isLoaderRow) {
+                            //                 return hasNextPage ? 'Loading more...' : 'Nothing more to load';
+                            //             } else {
+                            //                 const column = virtualRow.index % 3;
+                            //                 const row = Math.floor(virtualRow.index / 3); // int col = index / mRowCount;
+                            //                 console.log(virtualRow.index, "col: ", column, " row: ", row);
+                            //                 return <TaskCard
+                            //                         key={virtualRow.index}
+                            //                         task={task}
+                            //                         setFavorite={setFavorite}
+                            //                         setLike={setLiked}/>
+                            //             }
+                            //         })
+                            //         }
+                            //     </SimpleGrid>
+                            // </div>
                         )}
                         {/*{tasksLoading ? <Center mt={48}><Loader size={150}/></Center> :*/}
                         {/*    <SimpleGrid breakpoints={[*/}
@@ -393,4 +370,15 @@ const ListTasksInfinite = () => {
         </>
     );
 };
+const InfiniteGridWrapper = React.forwardRef((props, ref) => {
+    console.log("children", props);
+    return (
+        <SimpleGrid ref={ref} breakpoints={[
+            {minWidth: 480, cols: 1, spacing: 'sm'},
+            {minWidth: 768, cols: 2, spacing: 'sm'},
+            {minWidth: 1024, cols: 3, spacing: 'sm'},
+        ]}>{props.children}</SimpleGrid>
+    )
+});
+
 export default ListTasksInfinite;
