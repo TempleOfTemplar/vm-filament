@@ -6,7 +6,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {fetchToys} from "@/services/ToysService";
 import {fetchTags} from "@/services/TagsService";
 import {fetchCategories} from "@/services/CategoriesService";
-import {createTask, editTask, getTaskById} from "@/services/TasksService";
+import {createTask, editTask, fetchTaskById} from "@/services/TasksService";
 import {Flipped, spring} from "react-flip-toolkit";
 import {Task} from "@/Models/Task";
 import {useTheme} from "@emotion/react";
@@ -71,7 +71,7 @@ const CreateOrEditTask = () => {
         const editMode = useMemo(() => {
             return !(taskId === undefined);
         }, [taskId]);
-        const {data: task, isLoading: taskLoading} = useQuery(["tasks", taskId], () => getTaskById(taskId), {
+        const {data: task, isLoading: taskLoading} = useQuery(["tasks", taskId], () => fetchTaskById(taskId), {
             enabled: editMode
         });
         const queryClient = useQueryClient();

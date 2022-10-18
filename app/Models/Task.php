@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Overtrue\LaravelFavorite\Traits\Favoriteable;
@@ -10,11 +11,10 @@ use RyanChandler\Comments\Concerns\HasComments;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
-use willvincent\Rateable\Rateable;
 
 class Task extends Model implements HasMedia
 {
-    use HasTags, Favoriteable, InteractsWithMedia, HasComments, Likeable;
+    use HasTags, HasFactory, Favoriteable, InteractsWithMedia, HasComments, Likeable;
 
     public $table = 'tasks';
 
@@ -22,6 +22,7 @@ class Task extends Model implements HasMedia
         'title',
         'excerpt',
         'category_id',
+        'author_id',
         'content'
     ];
 
@@ -65,11 +66,15 @@ class Task extends Model implements HasMedia
         parent::boot();
 
         static::creating(function ($model) {
-            $model->author_id = Auth::id();
+            if(!$model->author_id) {
+                $model->author_id = Auth::id();
+            }
         });
 
         static::updating(function ($model) {
-            $model->author_id = Auth::id();
+            if(!$model->author_id) {
+                $model->author_id = Auth::id();
+            }
         });
     }
 }

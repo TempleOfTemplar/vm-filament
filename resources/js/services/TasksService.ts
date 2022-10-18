@@ -1,9 +1,20 @@
 import {Task} from "@/Models/Task";
 import api from "@/utils/Api";
+import {TasksCursorPaginator} from "@/Models/CursorPaginator";
 
 export async function fetchTasks(filterData: any): Promise<Task[]> {
     const [, filters] = filterData.queryKey;
     const res = await api().get('/api/tasks', {params: filters})
+    return res.data;
+}
+
+export async function fetchTasksWithPagination(
+    { pageParam = 0 }: any
+): Promise<TasksCursorPaginator> {
+    console.log("NEWPAGE", pageParam);
+    const res = await api().get('/api/tasks', {params: {cursor: pageParam}})
+    // await new Promise((r) => setTimeout(r, 500))
+
     return res.data;
 }
 
@@ -17,7 +28,7 @@ export async function fetchFavoriteTasks(): Promise<Task[]> {
     return res.data;
 }
 
-export async function getTaskById(id?: string): Promise<Task> {
+export async function fetchTaskById(id?: string): Promise<Task> {
     const res = await api().get(`/api/tasks/${id}`)
     return res.data;
 }

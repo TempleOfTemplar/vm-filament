@@ -29,11 +29,7 @@ root.render(
     <HelmetProvider>
         <QueryClientProvider client={queryClient}>
             <Sanctum config={sanctumConfig}>
-                <BrowserRouter>
-                    <QueryParamProvider adapter={ReactRouter6Adapter}>
-                        <App/>
-                    </QueryParamProvider>
-                </BrowserRouter>
+                    <App/>
             </Sanctum>
         </QueryClientProvider>
     </HelmetProvider>

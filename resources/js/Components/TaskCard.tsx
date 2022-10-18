@@ -16,13 +16,13 @@ import {
     ScrollArea,
     Text
 } from '@mantine/core';
-import {Toy} from "../Models/Toy";
-import {Tag} from "../Models/Tag";
+import {Toy} from "@/Models/Toy";
+import {Tag} from "@/Models/Tag";
 import classNames from "classnames";
 import {useSanctum} from "react-sanctum";
-import {Link, useHref} from "react-router-dom";
+import {Link} from "react-router-dom";
 import "./TaskCard.css";
-import {Flipped, spring} from "react-flip-toolkit";
+import {spring} from "react-flip-toolkit";
 import {RWebShare} from "react-web-share";
 
 const onAppear = (el: any, i: any) => {
@@ -131,7 +131,7 @@ interface TaskCardProps {
 //     setTimeout(removeElement, 200);
 // };
 
-const TaskCard: FC<TaskCardProps> = ({task, setFavorite, setLike}) => {
+const TaskCard: FC<TaskCardProps> = ({task, setFavorite, setLike, ref}) => {
     const {classes, theme} = useStyles();
     const [commentsOpened, setCommentsOpened] = useState<boolean>(false);
     const {user} = useSanctum();
@@ -143,149 +143,158 @@ const TaskCard: FC<TaskCardProps> = ({task, setFavorite, setLike}) => {
         'whatsapp'
     ]);
 
+    // const bind = useDrag(state => {
+    //     const {
+    //         swipe,         // [swipeX, swipeY] 0 if no swipe detected, -1 or 1 otherwise
+    //         tap,           // is the drag assimilated to a tap
+    //     } = state
+    // })
+
+
     function toggleComments(): void {
         setCommentsOpened(!commentsOpened);
     }
 
     return (
-        <Flipped flipId={`task-card-${task.id}`} onAppear={onAppear} onExit={onExit} stagger="task-card">
-            <Card withBorder radius="md" p="md"
-                  className={classNames(classes.card)}>
-                <>
-                    <Card.Section className={classes.titleAndExcerptSection} py={4} px='xs' mt={0} mb={0}>
-                        <Text size="lg" weight={500}>
-                            {task.title}
+        // <motion.div layoutId={`card-${task.id}`}>
+        <Card withBorder radius="md" p="md"
+              className={classNames(classes.card)}>
+            <>
+                <Card.Section className={classes.titleAndExcerptSection} py={4} px='xs' mt={0} mb={0}>
+                    <Text size="lg" weight={500}>
+                        {task.title}
+                    </Text>
+                    {/* TODO task.category <Badge size="sm">{task.category}</Badge>*/}
+                    <ScrollArea style={{width: '100%', height: '100%'}} offsetScrollbars={true}>
+                        <Text size="sm" mt={0}>
+                            {task.excerpt}
                         </Text>
-                        {/* TODO task.category <Badge size="sm">{task.category}</Badge>*/}
-                        <ScrollArea style={{width: '100%', height: '100%'}} offsetScrollbars={true}>
-                            <Text size="sm" mt={0}>
-                                {task.excerpt}
-                            </Text>
-                        </ScrollArea>
-                    </Card.Section>
-                    <Card.Section py={4} px='xs' mt={0} mb={0}>
-                        <Divider my={0} label="Теги" labelPosition="center"/>
-                        {task.tags?.length ?
-                            <ScrollArea style={{width: '100%'}}>
-                                <Group spacing={4} mt={0} className={classes.tagsSection}>
-                                    {task.tags.map((tag: Tag) => (
-                                        <Badge
-                                            size='md'
-                                            variant='outline'
-                                            color={theme.colorScheme === 'dark' ? 'dark' : 'gray'}
-                                            key={tag?.id}
-                                        >
-                                            {tag?.name?.ru}
-                                        </Badge>
-                                    ))}
-                                </Group>
-                            </ScrollArea>
-                            :
-                            <Center style={{width: '100%'}} className={classes.tagsSection}><Text color="dimmed">У этого
-                                задания нет
-                                тегов</Text></Center>}
-                    </Card.Section>
-
-
-                    <Card.Section py={4} px='xs' mt={0} mb={0}>
-                        <Divider my={0} label="Инвентарь" labelPosition="center"/>
-                        {task.toys?.length ?
-                            <>
-                                <ScrollArea style={{width: '100%', height: 50}}>
-                                    <Grid m={0} p={0}>
-                                        {task.toys.map((toy: Toy) => (
-                                            // <Image
-                                            //     width={50}
-                                            //     radius="md"
-                                            //     src={toy.image.thumbnail_url}
-                                            //     alt={toy.title}
-                                            //     caption={toy.title}
-                                            // />
-                                            <Col span="content" key={toy.id} m={0} p={0}>
-                                                <Badge
-                                                    size='md'
-                                                    variant='filled'
-                                                    color={theme.colorScheme === 'dark' ? 'dark' : 'gray'}
-
-                                                >
-                                                    {toy.title}
-                                                </Badge>
-                                            </Col>
-                                        ))}
-                                    </Grid>
-                                </ScrollArea>
-                            </>
-                            :
-                            <Center style={{width: '100%', height: 50}}><Text mt="md" className={classes.label}
-                                                                              color="dimmed">
-                                Инвентарь не требуется
-                            </Text></Center>}
-                    </Card.Section>
-
-
-                    {task.author ? <Group mt="lg" position="apart">
-                        <Group>
-                            <Avatar src={task.author.avatar} radius="sm"/>
-                            <Text weight={500}>{task.author.name}</Text>
-                        </Group>
-                        {user && task.author.id === user.id ? <ActionIcon className={classes.editButton}
-                                                                          component={Link}
-                                                                          to={`/tasks/edit/${task.id}`}
-                                                                          variant="default"
-                                                                          radius="md"
-                                                                          size={36}
-                                                                          onClick={() => {
-                                                                          }}>
-                            <IconPencil size={18} stroke={1.5}/>
-                        </ActionIcon> : null}
-                    </Group> : null}
-                    <Group mt="xs">
-                        {/*<Rating></Rating>*/}
-                    </Group>
-
-                    <Card.Section className={classes.footer}>
-                        <Group position="apart">
-                            <Button component={Link} radius="md" to={`/tasks/${task.id}`}>
-                                Читать
-                            </Button>
-                            <Group spacing={4}>
-                                <ActionIcon variant="default" radius="md" size={36}>
-                                    <IconMessage size={18}
-                                                 onClick={() => toggleComments()}
-                                                 className={classNames(classes.comment)}
-                                                 stroke={1.5}/>
-                                </ActionIcon>
-                                {setLike ? <ActionIcon variant="default" radius="md" size={36}>
-                                    <Text className={classes.likeCountText}>{task.likers_count}</Text>
-                                    <IconHeart size={18}
-                                               onClick={() => setLike(task)}
-                                               className={classNames(classes.like, {[classes.likeFilled]: task.has_liked})}
-                                               stroke={1.5}/>
-                                </ActionIcon> : null}
-                                {setFavorite ? <ActionIcon variant="default" radius="md" size={36}
-                                                           onClick={() => setFavorite(task)}>
-                                    <IconBookmark size={18}
-                                                  className={classNames(classes.bookmark, {[classes.bookmarkFilled]: task.has_favorited})}
-                                                  stroke={1.5}/>
-                                </ActionIcon> : null}
-                                <RWebShare
-                                    sites={sitesToShare}
-                                    disableNative={true}
-                                    data={{
-                                        text: `Вам задание "${task.title}" от virtual-mistress`,
-                                        url: linkToTask,
-                                        title: "Поделиться заданием",
-                                    }}>
-                                    <ActionIcon variant="default" radius="md" size={36}>
-                                        <IconShare size={16} color={theme.colors.blue[6]} stroke={1.5}/>
-                                    </ActionIcon>
-                                </RWebShare>
+                    </ScrollArea>
+                </Card.Section>
+                <Card.Section py={4} px='xs' mt={0} mb={0}>
+                    <Divider my={0} label="Теги" labelPosition="center"/>
+                    {task.tags?.length ?
+                        <ScrollArea style={{width: '100%'}}>
+                            <Group spacing={4} mt={0} className={classes.tagsSection}>
+                                {task.tags.map((tag: Tag) => (
+                                    <Badge
+                                        size='md'
+                                        variant='outline'
+                                        color={theme.colorScheme === 'dark' ? 'dark' : 'gray'}
+                                        key={tag?.id}
+                                    >
+                                        {tag?.name?.ru}
+                                    </Badge>
+                                ))}
                             </Group>
+                        </ScrollArea>
+                        :
+                        <Center style={{width: '100%'}} className={classes.tagsSection}><Text color="dimmed">У
+                            этого
+                            задания нет
+                            тегов</Text></Center>}
+                </Card.Section>
+
+
+                <Card.Section py={4} px='xs' mt={0} mb={0}>
+                    <Divider my={0} label="Инвентарь" labelPosition="center"/>
+                    {task.toys?.length ?
+                        <>
+                            <ScrollArea style={{width: '100%', height: 50}}>
+                                <Grid m={0} p={0}>
+                                    {task.toys.map((toy: Toy) => (
+                                        // <Image
+                                        //     width={50}
+                                        //     radius="md"
+                                        //     src={toy.image.thumbnail_url}
+                                        //     alt={toy.title}
+                                        //     caption={toy.title}
+                                        // />
+                                        <Col span="content" key={toy.id} m={0} p={0}>
+                                            <Badge
+                                                size='md'
+                                                variant='filled'
+                                                color={theme.colorScheme === 'dark' ? 'dark' : 'gray'}
+
+                                            >
+                                                {toy.title}
+                                            </Badge>
+                                        </Col>
+                                    ))}
+                                </Grid>
+                            </ScrollArea>
+                        </>
+                        :
+                        <Center style={{width: '100%', height: 50}}><Text mt="md" className={classes.label}
+                                                                          color="dimmed">
+                            Инвентарь не требуется
+                        </Text></Center>}
+                </Card.Section>
+
+
+                {task.author ? <Group mt="lg" position="apart">
+                    <Group>
+                        <Avatar src={task.author.avatar} radius="sm"/>
+                        <Text weight={500}>{task.author.name}</Text>
+                    </Group>
+                    {user && task.author.id === user.id ? <ActionIcon className={classes.editButton}
+                                                                      component={Link}
+                                                                      to={`/tasks/edit/${task.id}`}
+                                                                      variant="default"
+                                                                      radius="md"
+                                                                      size={36}
+                                                                      onClick={() => {
+                                                                      }}>
+                        <IconPencil size={18} stroke={1.5}/>
+                    </ActionIcon> : null}
+                </Group> : null}
+                <Group mt="xs">
+                    {/*<Rating></Rating>*/}
+                </Group>
+
+                <Card.Section className={classes.footer}>
+                    <Group position="apart">
+                        <Button component={Link} radius="md" to={`/tasks/${task.id}`}>
+                            Читать
+                        </Button>
+                        <Group spacing={2}>
+                            {/*<ActionIcon variant="default" radius="md" size={36}>*/}
+                            {/*    <IconMessage size={18}*/}
+                            {/*                 onClick={() => toggleComments()}*/}
+                            {/*                 className={classNames(classes.comment)}*/}
+                            {/*                 stroke={1.5}/>*/}
+                            {/*</ActionIcon>*/}
+                            {setLike ? <ActionIcon variant="default" radius="md" size={36}>
+                                <Text className={classes.likeCountText}>{task.likers_count}</Text>
+                                <IconHeart size={18}
+                                           onClick={() => setLike(task)}
+                                           className={classNames(classes.like, {[classes.likeFilled]: task.has_liked})}
+                                           stroke={1.5}/>
+                            </ActionIcon> : null}
+                            {setFavorite ? <ActionIcon variant="default" radius="md" size={36}
+                                                       onClick={() => setFavorite(task)}>
+                                <IconBookmark size={18}
+                                              className={classNames(classes.bookmark, {[classes.bookmarkFilled]: task.has_favorited})}
+                                              stroke={1.5}/>
+                            </ActionIcon> : null}
+                            <RWebShare
+                                sites={sitesToShare}
+                                disableNative={true}
+                                data={{
+                                    text: `Вам задание "${task.title}" от virtual-mistress`,
+                                    url: linkToTask,
+                                    title: "Поделиться заданием",
+                                }}>
+                                <ActionIcon variant="default" radius="md" size={36}>
+                                    <IconShare size={16} color={theme.colors.blue[6]} stroke={1.5}/>
+                                </ActionIcon>
+                            </RWebShare>
                         </Group>
-                    </Card.Section>
-                </>
-            </Card>
-        </Flipped>
+                    </Group>
+                </Card.Section>
+            </>
+        </Card>
+        // </motion.div>
     );
 };
 

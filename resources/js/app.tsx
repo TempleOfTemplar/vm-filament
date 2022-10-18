@@ -1,17 +1,19 @@
 import React, {useState} from 'react';
-import {Navigate, Route, Routes, useLocation} from 'react-router-dom';
+import {createBrowserRouter, Outlet, RouterProvider} from 'react-router-dom';
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/auth/Login";
 import Register from "./Pages/Auth/Register";
-import FavoritedTasks from "./Pages/Task/FavoritedTasks";
-import ListMyTasks from "./Pages/Task/ListMyTasks";
 import ListTasks from "./Pages/Task/ListTasks";
 import ViewTask from "./Pages/Task/ViewTask";
-import CreateOrEditTask from "./Pages/Task/CreateOrEditTask";
 import {AppShell, ColorScheme, ColorSchemeProvider, createStyles, Footer, MantineProvider} from "@mantine/core";
 import AppHeader from "@/Components/AppHeader";
 import {NotificationsProvider} from "@mantine/notifications";
-import {Flipper} from "react-flip-toolkit";
+import {QueryClient} from "@tanstack/react-query";
+import {taskLoader} from "@/Loaders/TaskLoader";
+import {ReactRouter6Adapter} from "use-query-params/adapters/react-router-6";
+import {QueryParamProvider} from "use-query-params";
+import ListTasksInfinite from "@/Pages/Task/ListTasksInfinite";
+
 
 const simultaneousAnimations = ({
                                     hideEnteringElements,
@@ -35,6 +37,103 @@ const useStyles = createStyles((theme) => ({
     })
 );
 
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 1000 * 10,
+        },
+    },
+});
+// <Route index element={<Dashboard/>}/>*/}
+{/*    <Route path='login' element={<Login/>}/>*/
+}
+{/*    <Route path='register' element={<Register/>}/>*/
+}
+{/*    <Route path="tasks">*/
+}
+{/*        <Route path='' element={<ListTasks/>}/>*/
+}
+{/*        <Route path='add' element={<CreateOrEditTask/>}/>*/
+}
+{/*        <Route path=':taskId'*/
+}
+{/*               element={<ViewTask/>}*/
+}
+{/*               loader: ({ params }) => {*/
+}
+{/*                    return fakeGetTeam(params.teamId);*/
+}
+{/*                }*/
+}
+{/*        />*/
+}
+{/*        <Route path='edit/:taskId' element={<CreateOrEditTask/>}/>*/
+}
+{/*        <Route path='favorite' element={<FavoritedTasks/>}/>*/
+}
+{/*        <Route path='my' element={<ListMyTasks/>}/>*/
+}
+{/*    </Route>*/
+}
+{/*    <Route path="*" element={<Navigate to={'tasks'}/>}/>*/
+}
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <QueryParamProvider adapter={ReactRouter6Adapter}>
+            <AppShell
+                footer={
+                    <Footer height={60} p="md">
+                        Application footer
+                    </Footer>
+                }
+                padding={0}
+                header={
+                    <AppHeader>
+                    </AppHeader>
+                }
+            >
+                <Outlet/>
+            </AppShell>
+        </QueryParamProvider>,
+        children: [
+            {
+                path: 'login',
+                element: <Login/>
+            },
+            {
+                path: 'register',
+                element: <Register/>
+            },
+            {
+                path: 'tasks',
+                children: [
+                    {
+                        path: '',
+                        element: <ListTasks/>
+                    },
+                    {
+                        path: 'infinite',
+                        element: <ListTasksInfinite/>
+                    },
+                    {
+                        path: ":taskId",
+                        element: <ViewTask/>,
+                        loader: taskLoader(queryClient)
+                    },
+                    {
+                        path: "dashboard",
+                        element: <Dashboard/>,
+
+                    },
+                ],
+            }
+        ]
+    },
+
+]);
+
 function App() {
     //Getting isAuthenticated store value from Authentication reducer.
     // const {isAuthenticated, validateUserLoader} = useSelector(state => state.authenticateReducer)
@@ -57,42 +156,29 @@ function App() {
     const [colorScheme, setColorScheme] = useState<ColorScheme>('light');
     const toggleColorScheme = (value?: ColorScheme) =>
         setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
-    const location = useLocation();
+    // const location = useLocation();
 
     return <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
         <MantineProvider theme={{colorScheme}} withGlobalStyles withNormalizeCSS>
-            <NotificationsProvider><AppShell
-                className={classes.layout}
-                footer={
-                    <Footer height={60} p="md">
-                        Application footer
-                    </Footer>
-                }
-                padding={0}
-                header={
-                    <AppHeader>
-                    </AppHeader>
-                }
-            >
-                <Flipper
-                    flipKey={`${location.pathname}-${location.search}`}
-                >
-                    <Routes>
-                        <Route index element={<Dashboard/>}/>
-                        <Route path='login' element={<Login/>}/>
-                        <Route path='register' element={<Register/>}/>
-                        <Route path="tasks">
-                            <Route path='' element={<ListTasks/>}/>
-                            <Route path='add' element={<CreateOrEditTask/>}/>
-                            <Route path=':taskId' element={<ViewTask/>}/>
-                            <Route path='edit/:taskId' element={<CreateOrEditTask/>}/>
-                            <Route path='favorite' element={<FavoritedTasks/>}/>
-                            <Route path='my' element={<ListMyTasks/>}/>
-                        </Route>
-                        <Route path="*" element={<Navigate to={'tasks'}/>}/>
-                    </Routes>
-                </Flipper>
-            </AppShell>
+            <NotificationsProvider>
+                <RouterProvider router={router}/>
+
+                {/*<Routes>*/}
+                {/*    <Route index element={<Dashboard/>}/>*/}
+                {/*    <Route path='login' element={<Login/>}/>*/}
+                {/*    <Route path='register' element={<Register/>}/>*/}
+                {/*    <Route path="tasks">*/}
+                {/*        <Route path='' element={<ListTasks/>}/>*/}
+                {/*        <Route path='add' element={<CreateOrEditTask/>}/>*/}
+                {/*        <Route path=':taskId'*/}
+                {/*               element={<ViewTask/>}*/}
+                {/*        />*/}
+                {/*        <Route path='edit/:taskId' element={<CreateOrEditTask/>}/>*/}
+                {/*        <Route path='favorite' element={<FavoritedTasks/>}/>*/}
+                {/*        <Route path='my' element={<ListMyTasks/>}/>*/}
+                {/*    </Route>*/}
+                {/*    <Route path="*" element={<Navigate to={'tasks'}/>}/>*/}
+                {/*</Routes>*/}
             </NotificationsProvider>
         </MantineProvider>
     </ColorSchemeProvider>

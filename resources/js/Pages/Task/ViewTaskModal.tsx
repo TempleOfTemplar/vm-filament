@@ -21,7 +21,7 @@ import {Carousel} from "@mantine/carousel";
 import {Toy} from "@/Models/Toy";
 import MDEditor from "@uiw/react-md-editor";
 import {useQuery} from "@tanstack/react-query";
-import {getTaskById} from "@/services/TasksService";
+import {fetchTaskById} from "@/services/TasksService";
 import {useParams} from "react-router-dom";
 
 const useStyles = createStyles((theme) => ({}));
@@ -47,7 +47,7 @@ const onAppear = (el: any, i: any) => {
 const ViewTaskModal: FC<ViewTaskModalProps> = ({onClose}) => {
     let {taskId} = useParams<string>();
 
-    const {data: task, isLoading: taskLoading} = useQuery(["tasks", taskId], () => getTaskById(taskId));
+    const {data: task, isLoading: taskLoading} = useQuery(["tasks", taskId], () => fetchTaskById(taskId));
     const {classes, theme} = useStyles();
     const [opened, setOpened] = useState(false);
     useEffect(() => {

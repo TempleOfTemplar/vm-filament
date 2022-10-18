@@ -12,8 +12,7 @@ use RyanChandler\Comments\Contracts\IsComment;
 
 class Comment extends Model implements IsComment
 {
-    use HasFactory;
-    use SoftDeletes;
+    use HasFactory, HasFactory, SoftDeletes;
 
     protected $guarded = [];
 

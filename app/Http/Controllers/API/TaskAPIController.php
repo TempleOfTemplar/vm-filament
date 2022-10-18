@@ -10,6 +10,8 @@ use App\Models\Task;
 use App\Repositories\TaskRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\CursorPaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -29,11 +31,13 @@ class TaskAPIController extends AppBaseController
      * Display a listing of the Tasks.
      * GET|HEAD /tasks
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): CursorPaginator
     {
         $searchQuery = $request->input('search');
         $toysFilter = $request->input('toys');
         $tagsFilter = $request->input('tags');
+        $cursor = $request->input('cursor');
+
         $tasks = Task::withCount('likers')
             ->where("is_published", 1)
             ->when($searchQuery, function ($query, $search) {
@@ -49,16 +53,17 @@ class TaskAPIController extends AppBaseController
                     $query->whereIn('tag_id', $tagsFilter);
                 });
             })
-            ->with('toys')
-            ->with('category')
-            ->with('tags')
-            ->with('author')
-            ->with('comments')
-            ->get();
-
-        $tasks = Auth::user()->attachFavoriteStatus($tasks);
-        $tasks = Auth::user()->attachLikeStatus($tasks);
-        return $this->sendResponse($tasks->toArray(), 'Tasks retrieved successfully');
+            ->orderBy('id')
+//            ->load(['toys','category','tags','author','comments'])
+            ->cursorPaginate(15, ['*'], 'cursor', $cursor);
+//            ->with('toys')
+//            ->with('category')
+//            ->with('tags')
+//            ->with('author')
+//            ->with('comments')
+//        $tasks = Auth::user()->attachFavoriteStatus($tasks);
+//        $tasks = Auth::user()->attachLikeStatus($tasks);
+        return $tasks;
     }
 
     public function myTasks()
@@ -167,8 +172,7 @@ class TaskAPIController extends AppBaseController
 //        dd($task);
 
         $comments = [];//pluck('comments')->collapse();;
-        foreach($task->comments as $comment)
-        {
+        foreach ($task->comments as $comment) {
             array_push($comments, $comment);
             // working with comment here...
         }
