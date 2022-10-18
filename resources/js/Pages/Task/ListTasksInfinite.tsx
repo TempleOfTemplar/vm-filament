@@ -3,7 +3,7 @@ import {
     Affix,
     Button,
     Container, createStyles,
-    Group,
+    Group, keyframes,
     MultiSelect,
     Select,
     SimpleGrid,
@@ -31,14 +31,26 @@ import TaskCard from "@/Components/TaskCard";
 import {TasksCursorPaginator} from "@/Models/CursorPaginator";
 import {VirtuosoGrid} from 'react-virtuoso'
 
+export const bounce = keyframes({
+    '0%': {
+        transform: 'rotateY(20deg) rotateX(-35deg) translate(300px, 300px) skew(35deg, -10deg)',
+        opacity: 0
+    },
+    '100%': {
+        transform: 'rotateY(0) rotateX(0deg) translate(0, 0) skew(0deg, 0deg)',
+        opacity: 1
+    }
+});
+
 const useStyles = createStyles((theme) => ({
     gridList: {
         display: "flex",
         flexWrap: "wrap"
     },
     gridItem: {
-        width: "calc(100% / 3)"
-    }
+        width: "calc(100% / 3)",
+        animation: `${bounce} 0.6s cubic-bezier(0.250, 0.460, 0.450, 0.940) both`
+    },
 }));
 
 //href={route("tasks.edit", id)}
@@ -370,15 +382,5 @@ const ListTasksInfinite = () => {
         </>
     );
 };
-const InfiniteGridWrapper = React.forwardRef((props, ref) => {
-    console.log("children", props);
-    return (
-        <SimpleGrid ref={ref} breakpoints={[
-            {minWidth: 480, cols: 1, spacing: 'sm'},
-            {minWidth: 768, cols: 2, spacing: 'sm'},
-            {minWidth: 1024, cols: 3, spacing: 'sm'},
-        ]}>{props.children}</SimpleGrid>
-    )
-});
 
 export default ListTasksInfinite;

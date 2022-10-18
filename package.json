@@ -53,6 +53,7 @@
         "axios": "^0.27.2",
         "classnames": "^2.3.2",
         "clockwork-browser": "^1.1.1",
+        "framer-motion": "^7.5.4",
         "milkdown-plugin-image-picker": "^0.3.2",
         "qs": "^6.11.0",
         "react": "^18.2.0",
