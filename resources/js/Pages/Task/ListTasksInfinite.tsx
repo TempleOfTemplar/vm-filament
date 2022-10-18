@@ -2,11 +2,12 @@ import React, {ChangeEvent, useCallback, useEffect, useMemo, useRef, useState} f
 import {
     Affix,
     Button,
-    Container, createStyles,
-    Group, keyframes,
+    Container,
+    createStyles,
+    Group,
+    keyframes,
     MultiSelect,
     Select,
-    SimpleGrid,
     Space,
     Stack,
     TextInput,
@@ -42,14 +43,33 @@ export const bounce = keyframes({
     }
 });
 
+export const slideInElleptic = keyframes({
+    '0%': {
+        transform: 'translateY(600px) rotateX(30deg) scale(0)',
+        transformOrigin: '50% 100%',
+        opacity: 0
+    },
+    '100%': {
+        transform: 'translateY(0) rotateX(0) scale(1)',
+        transformOrigin: '50% -1400px',
+        opacity: 1
+    }
+});
+
 const useStyles = createStyles((theme) => ({
     gridList: {
         display: "flex",
         flexWrap: "wrap"
     },
     gridItem: {
-        width: "calc(100% / 3)",
-        animation: `${bounce} 0.6s cubic-bezier(0.250, 0.460, 0.450, 0.940) both`
+        width: "100%",
+        animation: `${bounce} 0.6s cubic-bezier(0.250, 0.460, 0.450, 0.940) both`,
+        [`@media (min-width: 768px)`]: {
+            width: 'calc(100% / 2)'
+        },
+        [`@media (min-width: 1024px)`]: {
+            width: 'calc(100% / 3)'
+        },
     },
 }));
 
@@ -297,14 +317,13 @@ const ListTasksInfinite = () => {
                             <span>Error: {(tasksError as Error).message}</span>
                         ) : (
                             tasksList.length ? <VirtuosoGrid
-                                style={{height: 600}}
+                                useWindowScroll
                                 overscan={200}
                                 data={tasksList}
                                 listClassName={classes.gridList}
                                 itemClassName={classes.gridItem}
                                 endReached={loadMore}
                                 itemContent={(index, task: Task) => {
-                                    console.log("ITASK", index, task);
                                     return <TaskCard
                                         task={tasksList[index]}
                                         setFavorite={setFavorite}
